@@ -1,0 +1,17 @@
+{
+"source": "./source",
+"destination": "./site",
+"metadata": {
+"siteTitle": "My Experimental Static Site",
+"description": "Experimenting with metalsmith."
+},
+"plugins": [
+{ "@metalsmith/markdown": {"gfm": true}},
+{ "@metalsmith/excerpts": true },
+{"@metalsmith/collections": {"blog": "blog/*[!index].html"}},
+{"metalsmith-layouts": {
+"default": "njk",
+"directory": "layouts"
+}}
+]
+}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="{{ description }}">
+<meta name="generator" content="metalsmith">
+
+<title>{{SiteTitle}}</title>
+<style>
+nav ul {list-style-type: none;}
+</style>
+
+</head>
+<body>
+<nav aria-label="site">
+<ul><li id="item1">
+<a id="item1-label" href="blog/index.html">Blog</a>
+<button aria-labelledby="item1-label" aria-haspopup="true" aria-expanded="false">&darr;</button>
+<ul class="menu" hidden>
+{% for post in collections.blog %}
+<li><a href="{{post.path}}">{{post.title}}</a>
+{% endfor %}
+</ul>
+</li><li>
+<a href="about.html">About</a>
+</li></ul>
+</nav>
+<main>
+<h1>{{ title }} - {{siteTitle}}</h1>
+<p>{{ description }}</p>
+<div>
+{{contents | safe}}
+</div>
+<hr>
+</main>
+<footer>
+<hr>
+<p>--end--</p>
+</footer>
+
+<script>
+const navMenuTogglers = [...document.querySelectorAll("nav button[aria-haspopup=true]")];
+
+document.querySelector("nav").addEventListener("click", e => {
+const toggler = e.target;
+if (toggler.hasAttribute("aria-haspopup")) toggleMenu(toggler);
+});
+
+function toggleMenu (toggler) {
+const menu = toggler.nextElementSibling;
+toggler.setAttribute("aria-expanded", (menu.hidden = !menu.hidden)?
+"false" : "true");
+} // toggleMenu
+</script>
+</body>
+</html>
