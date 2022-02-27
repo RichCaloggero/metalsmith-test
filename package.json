@@ -1,20 +1,21 @@
 {
-  "name": "static-site",
-  "private": true,
-  "dependencies": {
-    "@metalsmith/collections": "^1.2.1",
-    "@metalsmith/drafts": "*",
-    "@metalsmith/excerpts": "*",
-    "@metalsmith/markdown": "*",
-    "jstransformer-nunjucks": "*",
-    "metalsmith": "*",
-    "metalsmith-layouts": "*"
-  },
-  "devDependencies": {
-    "serve": "^13.0.2"
-  },
-  "scripts": {
-    "start": "metalsmith",
-    "serve": "serve site"
-  }
+"name": "static-site",
+"private": true,
+"dependencies": {
+"@metalsmith/collections": "^1.2.1",
+"@metalsmith/drafts": "*",
+"@metalsmith/excerpts": "*",
+"@metalsmith/markdown": "*",
+"jstransformer-nunjucks": "*",
+"metalsmith": "*",
+"metalsmith-layouts": "*"
+},
+"devDependencies": {
+"serve": "^13.0.2"
+},
+"scripts": {
+"start": "metalsmith",
+"serve": "serve site",
+"site": "npm run start && run-server"
+}
 }

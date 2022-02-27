@@ -1,4 +1,5 @@
 ---
+title: Dummy Blog
 layout: blog.njk
 ---
 

@@ -1,19 +1,23 @@
+{% block page %}
 <!DOCTYPE html>
 <html>
 <head>
+{% block head %}
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="{{ description }}">
 <meta name="generator" content="metalsmith">
 
-<title>{{SiteTitle}}</title>
+<title>{{siteTitle}} - {{title}}</title>
 <style>
 nav ul {list-style-type: none;}
 </style>
 
+{% endblock head %}
 </head>
 <body>
 <nav aria-label="site">
+{% block siteNavigation %}
 <ul><li id="item1">
 <a id="item1-label" href="blog/index.html">Blog</a>
 <button aria-labelledby="item1-label" aria-haspopup="true" aria-expanded="false">&darr;</button>
@@ -25,17 +29,19 @@ nav ul {list-style-type: none;}
 </li><li>
 <a href="about.html">About</a>
 </li></ul>
+{% endblock siteNavigation %}
 </nav>
 <main>
+{% block branding %}
 <h1>{{ title }} - {{siteTitle}}</h1>
 <p>{{ description }}</p>
-<div>
 {{contents | safe}}
-</div>
+{% endblock branding %}
 <hr>
+{% block pageContent %}
+{% endblock %}
 </main>
 <footer>
-<hr>
 <p>--end--</p>
 </footer>
 
@@ -55,3 +61,4 @@ toggler.setAttribute("aria-expanded", (menu.hidden = !menu.hidden)?
 </script>
 </body>
 </html>
+{% endblock page %}
