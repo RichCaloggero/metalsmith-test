@@ -1,6 +1,7 @@
 
 <!DOCTYPE html>
 <html>
+
 <head>
 
 <meta charset="utf-8">
@@ -18,23 +19,80 @@ nav ul {list-style-type: none;}
 <body>
 <nav aria-label="site">
 
-<ul><li id="item1">
-<a id="item1-label" href="blog/index.html">Blog</a>
-<button aria-labelledby="item1-label" aria-haspopup="true" aria-expanded="false">&darr;</button>
-<ul class="menu" hidden>
 
-<li><a href="blog\post1.html">First Post</a>
 
-<li><a href="blog\post2.html">Second Post</a>
+<ul class="menu">
 
-<li><a href="blog\post3.html">Third Post</a>
 
-<li><a href="blog\post4.html">Fourth Post</a>
+
+<li class="menu-item">
+
+<a id="id-blog" href="blog/index.html">blog</a>
+<button class="toggle" aria-haspopup="true" aria-expanded="false" aria-labelledby="id-blog">&darr;</button>
+
+
+
+
+
+<ul hidden class="menu">
+
+
+
+
+<li><a href="{{post.path}}">{{post.title}}</a></li>
+
+
+
+<li><a href="{{post.path}}">{{post.title}}</a></li>
+
+
+
+<li><a href="{{post.path}}">{{post.title}}</a></li>
+
+
+
+<li><a href="{{post.path}}">{{post.title}}</a></li>
+
+
 
 </ul>
-</li><li>
-<a href="about.html">About</a>
-</li></ul>
+
+
+</li>
+
+
+
+<li><a href="about.html">About</a></li>
+
+
+
+<li class="menu-item">
+
+<a id="id-dummy" href="https://www.mit.edu/">dummy</a>
+<button class="toggle" aria-haspopup="true" aria-expanded="false" aria-labelledby="id-dummy">&darr;</button>
+
+
+
+
+
+<ul hidden class="menu">
+
+
+
+<li><button class="action" data-name="">action one</button></li>
+
+
+<li><button class="action" data-name="">action two</button></li>
+
+
+</ul>
+
+
+</li>
+
+
+</ul>
+
 
 </nav>
 <main>
@@ -68,5 +126,5 @@ toggler.setAttribute("aria-expanded", (menu.hidden = !menu.hidden)?
 } // toggleMenu
 </script>
 </body>
-</html>
 
+</html>

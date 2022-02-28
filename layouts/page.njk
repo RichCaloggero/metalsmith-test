@@ -1,6 +1,7 @@
-{% block page %}
+{% import "menu.mac" as menu %}
 <!DOCTYPE html>
 <html>
+{% block page %}
 <head>
 {% block head %}
 <meta charset="utf-8">
@@ -18,17 +19,24 @@ nav ul {list-style-type: none;}
 <body>
 <nav aria-label="site">
 {% block siteNavigation %}
-<ul><li id="item1">
-<a id="item1-label" href="blog/index.html">Blog</a>
-<button aria-labelledby="item1-label" aria-haspopup="true" aria-expanded="false">&darr;</button>
-<ul class="menu" hidden>
+{% call menu.menu ("top level") %}
+{% call menu.menuItem(label="blog", hasLink="blog/index.html") %}
+{% call menu.menu() %}
 {% for post in collections.blog %}
-<li><a href="{{post.path}}">{{post.title}}</a>
+{{menu.link("{{post.path}}", "{{post.title}}")}}
 {% endfor %}
-</ul>
-</li><li>
-<a href="about.html">About</a>
-</li></ul>
+{% endcall %}
+{% endcall %}
+
+{{menu.link("about.html", "About")}}
+
+{% call menu.menuItem(label="dummy", hasLink="https://www.mit.edu/") %}
+{% call menu.menu() %}
+{{menu.action(label="action one")}}
+{{menu.action(label="action two")}}
+{% endcall %}
+{% endcall %}
+{% endcall %}
 {% endblock siteNavigation %}
 </nav>
 <main>
@@ -60,5 +68,5 @@ toggler.setAttribute("aria-expanded", (menu.hidden = !menu.hidden)?
 } // toggleMenu
 </script>
 </body>
-</html>
 {% endblock page %}
+</html>
