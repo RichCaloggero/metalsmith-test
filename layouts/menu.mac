@@ -8,7 +8,7 @@
 </ul>
 {% endmacro %}
 
-{% macro menuItem(label="add a label", hasLink="", items) %}
+{% macro submenu (label="add a label", hasLink="", items) %}
 <li class="menu-item">
 {% if hasLink %}
 <a id="id-{{label}}" href="{{hasLink}}">{{label}}</a>
@@ -26,5 +26,5 @@
 {% endmacro %}
 
 {% macro action(name, label) %}
-<li><button class="action" data-name="{{name}}">{{label}}</button></li>
+<li><button class="action" data-action="{{name}}">{{label}}</button></li>
 {% endmacro %}

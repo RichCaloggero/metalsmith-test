@@ -20,7 +20,7 @@ nav ul {list-style-type: none;}
 <nav aria-label="site">
 {% block siteNavigation %}
 {% call menu.menu ("top level") %}
-{% call menu.menuItem(label="blog", hasLink="blog/index.html") %}
+{% call menu.submenu(label="blog", hasLink="blog/index.html") %}
 {% call menu.menu() %}
 {% for post in collections.blog %}
 {{menu.link("{{post.path}}", "{{post.title}}")}}
@@ -30,10 +30,10 @@ nav ul {list-style-type: none;}
 
 {{menu.link("about.html", "About")}}
 
-{% call menu.menuItem(label="dummy", hasLink="https://www.mit.edu/") %}
+{% call menu.submenu(label="dummy", hasLink="https://www.mit.edu/") %}
 {% call menu.menu() %}
-{{menu.action(label="action one")}}
-{{menu.action(label="action two")}}
+{{menu.action(label="action one", name="do something")}}
+{{menu.action(label="action two", name="do something else")}}
 {% endcall %}
 {% endcall %}
 {% endcall %}
@@ -54,18 +54,24 @@ nav ul {list-style-type: none;}
 </footer>
 
 <script>
-const navMenuTogglers = [...document.querySelectorAll("nav button[aria-haspopup=true]")];
-
 document.querySelector("nav").addEventListener("click", e => {
-const toggler = e.target;
-if (toggler.hasAttribute("aria-haspopup")) toggleMenu(toggler);
+const trigger = e.target;
+if (trigger.matches("[aria-haspopup=true]")) toggleMenu(trigger);
+else if (trigger.matches("[data-action]")) trigger.dispatchEvent(new CustomEvent("action", {detail: {name: trigger.dataset.action}, bubbles: true}));
+
 });
+
+document.querySelector("nav").addEventListener("action", e => reportAction(e.detail, e.target));
 
 function toggleMenu (toggler) {
 const menu = toggler.nextElementSibling;
 toggler.setAttribute("aria-expanded", (menu.hidden = !menu.hidden)?
 "false" : "true");
 } // toggleMenu
+
+function reportAction (detail, target) {
+alert (`got ${detail.name} on ${target}`);
+} // reportAction
 </script>
 </body>
 {% endblock page %}
