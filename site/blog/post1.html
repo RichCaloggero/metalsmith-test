@@ -1,15 +1,138 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html>
+
 <head>
-<title>First Post </title>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Experimenting with metalsmith.">
 <meta name="generator" content="metalsmith">
+
+<title>My Experimental Static Site - First Post</title>
+<style>
+nav ul {list-style-type: none;}
+</style>
+
+
 </head>
 <body>
-<h1>First Post</h1>
+<nav aria-label="site">
+
+
+
+<ul class="menu">
+
+
+
+<li class="menu-item">
+
+<a id="id-blog" href="/blog/index.html">blog</a>
+<button class="toggle" aria-haspopup="true" aria-expanded="false" aria-labelledby="id-blog">&darr;</button>
+
+
+
+
+
+<ul hidden class="menu">
+
+
+
+
+<li><a href="/blog\post1.html">First Post</a></li>
+
+
+
+<li><a href="/blog\post2.html">Second Post</a></li>
+
+
+
+<li><a href="/blog\post3.html">Third Post</a></li>
+
+
+
+<li><a href="/blog\post4.html">Fourth Post</a></li>
+
+
+
+</ul>
+
+
+</li>
+
+
+
+<li><a href="/about.html">About</a></li>
+
+
+
+<li class="menu-item">
+
+<a id="id-dummy" href="https://www.mit.edu/">dummy</a>
+<button class="toggle" aria-haspopup="true" aria-expanded="false" aria-labelledby="id-dummy">&darr;</button>
+
+
+
+
+
+<ul hidden class="menu">
+
+
+
+<li><button class="action" data-action="do something">action one</button></li>
+
+
+<li><button class="action" data-action="do something else">action two</button></li>
+
+
+</ul>
+
+
+</li>
+
+
+</ul>
+
+
+</nav>
+<main>
+
+<h1>First Post - My Experimental Static Site</h1>
+<p>Experimenting with metalsmith.</p>
+
+<hr>
+<p>An interesting post about how it&#39;s going to be different this time around. I&#39;m going write a lot more nowadays and use this blog to improve my writing.</p>
+
+
 <time>Sun Aug 19 2012 20:00:00 GMT-0400 (Eastern Daylight Time)</time>
 <p>An interesting post about how it&#39;s going to be different this time around. I&#39;m going write a lot more nowadays and use this blog to improve my writing.</p>
 
+
+</main>
+<footer>
+<p>--end--</p>
+</footer>
+
+<script>
+document.querySelector("nav").addEventListener("click", e => {
+const trigger = e.target;
+if (trigger.matches("[aria-haspopup=true]")) toggleMenu(trigger);
+else if (trigger.matches("[data-action]")) trigger.dispatchEvent(new CustomEvent("action", {detail: {name: trigger.dataset.action}, bubbles: true}));
+
+});
+
+document.querySelector("nav").addEventListener("action", e => reportAction(e.detail, e.target));
+
+function toggleMenu (toggler) {
+const menu = toggler.nextElementSibling;
+toggler.setAttribute("aria-expanded", (menu.hidden = !menu.hidden)?
+"false" : "true");
+} // toggleMenu
+
+function reportAction (detail, target) {
+alert (`got ${detail.name} on ${target}`);
+} // reportAction
+</script>
 </body>
+
 </html>

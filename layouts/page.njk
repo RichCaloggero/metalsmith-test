@@ -20,15 +20,15 @@ nav ul {list-style-type: none;}
 <nav aria-label="site">
 {% block siteNavigation %}
 {% call menu.menu ("top level") %}
-{% call menu.submenu(label="blog", hasLink="blog/index.html") %}
+{% call menu.submenu(label="blog", hasLink="/blog/index.html") %}
 {% call menu.menu() %}
 {% for post in collections.blog %}
-{{menu.link("{{post.path}}", "{{post.title}}")}}
+{{menu.link("/"+post.path, post.title)}}
 {% endfor %}
 {% endcall %}
 {% endcall %}
 
-{{menu.link("about.html", "About")}}
+{{menu.link("/about.html", "About")}}
 
 {% call menu.submenu(label="dummy", hasLink="https://www.mit.edu/") %}
 {% call menu.menu() %}
@@ -43,9 +43,9 @@ nav ul {list-style-type: none;}
 {% block branding %}
 <h1>{{ title }} - {{siteTitle}}</h1>
 <p>{{ description }}</p>
-{{contents | safe}}
 {% endblock branding %}
 <hr>
+{{contents | safe}}
 {% block pageContent %}
 {% endblock %}
 </main>
