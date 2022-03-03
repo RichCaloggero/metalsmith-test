@@ -19,22 +19,18 @@ nav ul {list-style-type: none;}
 <body>
 <nav aria-label="site">
 {% block siteNavigation %}
-{% call menu.menu ("top level") %}
+{% call menu.menu (top="top level") %}
 {% call menu.submenu(label="blog", hasLink="/blog/index.html") %}
-{% call menu.menu() %}
-{% for post in collections.blog %}
-{{menu.link("/"+post.path, post.title)}}
-{% endfor %}
-{% endcall %}
+{{menu.menuFromCollection(type="links", collection=collections.blog)}}
 {% endcall %}
 
 {{menu.link("/about.html", "About")}}
 
 {% call menu.submenu(label="dummy", hasLink="https://www.mit.edu/") %}
-{% call menu.menu() %}
-{{menu.action(label="action one", name="do something")}}
-{{menu.action(label="action two", name="do something else")}}
-{% endcall %}
+{{menu.menuFromCollection (type="actions", collection=[
+{name: "action1", label: "do something"},
+{name: "action2", label: "do something else"}
+])}}
 {% endcall %}
 {% endcall %}
 {% endblock siteNavigation %}

@@ -4,9 +4,32 @@
 {% else %}
 <ul hidden class="menu">
 {% endif %}
+
 {{caller()}}
 </ul>
 {% endmacro %}
+
+{% macro menuFromCollection (type="", collection) %}
+{% if top %}
+<ul class="menu">
+{% else %}
+<ul hidden class="menu">
+{% endif %}
+
+<li>collection: {{collection | dump}}</li>
+
+{% if collection %}
+{% for item in collection %}
+{% if type == "links" %}
+{{ link(url=item.path, label=item.title)}}
+{% else %}
+{{action(name=item.name, label=item.label)}}
+{% endif %}
+{% endfor %}
+{% endif %}
+</ul>
+{% endmacro %}
+
 
 {% macro submenu (label="add a label", hasLink="", items) %}
 <li class="menu-item">
@@ -21,10 +44,10 @@
 </li>
 {% endmacro %}
 
-{% macro link (url, label) %}
+{% macro link (url="", label="") %}
 <li><a href="{{url}}">{{label}}</a></li>
 {% endmacro %}
 
-{% macro action(name, label) %}
+{% macro action(name="", label="") %}
 <li><button class="action" data-action="{{name}}">{{label}}</button></li>
 {% endmacro %}
