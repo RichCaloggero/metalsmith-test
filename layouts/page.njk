@@ -17,6 +17,10 @@ nav ul {list-style-type: none;}
 {% endblock head %}
 </head>
 <body>
+{# this would usually be a logo image #}
+<div class="logo">
+{{siteTitle}}
+</div>
 <nav aria-label="site">
 {% block siteNavigation %}
 {% call menu.menu (top="top level") %}

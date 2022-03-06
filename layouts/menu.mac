@@ -16,8 +16,6 @@
 <ul hidden class="menu">
 {% endif %}
 
-<li>collection: {{collection | dump}}</li>
-
 {% if collection %}
 {% for item in collection %}
 {% if type == "links" %}
