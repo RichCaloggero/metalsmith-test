@@ -17,6 +17,7 @@
   "scripts": {
     "start": "cls & metalsmith",
     "serve": "run-server",
-    "site": "npm run start && npm run serve"
-  }
+    "site": "npm run start && npm run serve",
+    "backend": "nodemon server.js"
+}
 }
