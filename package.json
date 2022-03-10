@@ -12,12 +12,17 @@
     "metalsmith-layouts": "*"
   },
   "devDependencies": {
+    "metalsmith-auto-collections": "^0.2.0",
     "serve": "^13.0.2"
   },
   "scripts": {
-    "start": "cls & metalsmith",
+    "build": "cls & metalsmith",
     "serve": "run-server",
-    "site": "npm run start && npm run serve",
-    "backend": "nodemon server.js"
-}
+    "site": "npm run build && npm run serve",
+    "backend": "node backend/server.js",
+    "monitor-content": "title content & nodemon -e md -w source --exec npm run build",
+    "monitor-backend": "nodemon -w backend --exec npm run backend",
+    "monitor": "start monitor-content & start monitor-backend"
+
+  }
 }

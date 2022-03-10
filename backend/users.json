@@ -1,0 +1,9 @@
+{
+"template": {
+"name": "",
+"firstName": "", "lastName": "",
+"eMail": "",
+"password": ""
+},
+"users": []
+}

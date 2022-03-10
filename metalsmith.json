@@ -8,7 +8,8 @@
 "plugins": [
 { "@metalsmith/markdown": {"gfm": true}},
 { "@metalsmith/excerpts": true },
-{"@metalsmith/collections": {"blog": "blog/*[!index].html"}},
+{"metalsmith-auto-collections": true},
+{"@metalsmith/collections": {}},
 {"metalsmith-layouts": {
 "default": "njk",
 "directory": "layouts"

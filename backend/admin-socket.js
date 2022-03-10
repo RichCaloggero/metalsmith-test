@@ -1,7 +1,9 @@
 const marked = require ("marked");
 const fs = require("fs");
 const express = require("express");
-let error = "";
+const server = require('http').createServer(express());
+const io = require('socket.io')(server);
+
 
 module.exports = function (req, res) {
 let content = "";
@@ -11,38 +13,39 @@ content = fs.readFileSync("source/" + path(req.path)).toString();
 console.log("read file...");
 
 } catch (e) {
-error = e;
 res.send(errorResponse(e));
 res.end();
-return;
+return
 } // try
 
-res.send(contentForm(content));
-req.app.use(express.urlencoded());
-req.app.post("/admin/" + path(req.path), receiveContent);
+startSocket (content);
 } // admin
+
+
+function startSocket (content) {
+sendEditorPage(content);
+io.on('connection', handleSocket);
+server.listen(3000);
+} // startSocket
+
 
 /// receiver
 
 function receiveContent (req, res) {
-const content = req.body.content;
-//console.log("got body: ", content);
-
+console.log("got body: ", req.body);
 try {
-fs.writeFileSync("source/" + path(req.path), content);
-
-} catch (e) {
-res.send(errorResponse(e));
-res.end();
-} // try
-
+fs.writeFileSync("source/" + path(req.path), req.body.content);
 res.send(`
 ${head("saved")}
-${body(`
-<p role="alert">Save Complete</p>
-${contentForm(content)}
-`)}
-`); // send
+${body("Save complete.")}
+`);
+
+} catch (e) {
+res.send(`
+${head("error")}
+${body(e)}
+`);
+} // try
 res.end();
 } // receiveContent
 
@@ -53,9 +56,9 @@ res.send(errorResponse(error));
 
 /// simple html generator
 
-function errorResponse (error) {
+function errorResponse (content) {
 return `${head("error")}
-${body(error)}
+${body(content)}
 `;
 } // errorResponse
 
