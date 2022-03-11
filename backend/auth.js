@@ -1,3 +1,5 @@
+console.log("authentication: ", process.cwd());
+
 const fs = require("fs");
 const db = readDatabase();
 const users = db.users;
@@ -41,11 +43,11 @@ return a && a.length > 0? a.every((x, i, a) => x === a[0])
 } // identical
 
 function readDatabase () {
-return JSON.parse(fs.readFileSync("users.json").toString());
+return JSON.parse(fs.readFileSync("./backend/users.json").toString());
 } // readDatabase
 
 function writeDatabase (db) {
-fs.writeFileSync("users.json", JSON.stringify(db, null, 2));
+fs.writeFileSync("./backend/users.json", JSON.stringify(db, null, 2));
 } // writeDatabase
 
 

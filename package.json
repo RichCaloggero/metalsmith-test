@@ -5,24 +5,23 @@
     "@metalsmith/collections": "^1.2.1",
     "@metalsmith/drafts": "*",
     "@metalsmith/excerpts": "*",
+    "@metalsmith/layouts": "^2.4.0",
     "@metalsmith/markdown": "*",
     "express": "^4.17.3",
     "jstransformer-nunjucks": "*",
-    "metalsmith": "*",
-    "metalsmith-layouts": "*"
+    "metalsmith": "*"
   },
   "devDependencies": {
     "metalsmith-auto-collections": "^0.2.0",
     "serve": "^13.0.2"
   },
   "scripts": {
-    "build": "cls & metalsmith",
+    "build": "node build.js",
     "serve": "run-server",
     "site": "npm run build && npm run serve",
     "backend": "node backend/server.js",
-    "monitor-content": "title content & nodemon -e md -w source --exec npm run build",
-    "monitor-backend": "nodemon -w backend --exec npm run backend",
-    "monitor": "start monitor-content & start monitor-backend"
-
+    "monitor-build": "start \"build\" nodemon -w source build.js",
+    "monitor-backend": "start \"backend\" nodemon -w backend backend/server.js",
+    "monitor": "npm run monitor-build & npm run monitor-backend"
   }
 }
