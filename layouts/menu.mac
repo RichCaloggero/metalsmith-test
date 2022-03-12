@@ -9,7 +9,7 @@
 </ul>
 {% endmacro %}
 
-{% macro menuFromCollection (type="", collection) %}
+{% macro fromCollection (type="", collection) %}
 {% if top %}
 <ul class="menu">
 {% else %}

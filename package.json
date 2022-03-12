@@ -16,11 +16,11 @@
     "serve": "^13.0.2"
   },
   "scripts": {
-    "build": "node build.js",
+    "build": "node run-build.js",
     "serve": "run-server",
     "site": "npm run build && npm run serve",
     "backend": "node backend/server.js",
-    "monitor-build": "start \"build\" nodemon -w source build.js",
+    "monitor-build": "start \"build\" nodemon -e njk,md,mac -w source -w layouts run-build.js",
     "monitor-backend": "start \"backend\" nodemon -w backend backend/server.js",
     "monitor": "npm run monitor-build & npm run monitor-backend"
   }

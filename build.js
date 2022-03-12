@@ -1,3 +1,5 @@
+module.exports = function build () {
+try {
 const metalsmith = require("metalsmith"),
 collections = require("@metalsmith/collections"),
 autoCollections = require("metalsmith-auto-collections"),
@@ -27,3 +29,9 @@ description: "Experimenting with metalsmith."
 .build(function(err) {     
 if (err) throw new Error(err);
 });
+
+console.log ("Build complete.");
+} catch (e) {
+console.error(e);
+} // try
+} // build

@@ -25,17 +25,19 @@ nav ul {list-style-type: none;}
 {% block siteNavigation %}
 {% call menu.menu (top="top level") %}
 {% call menu.submenu(label="blog", hasLink="/blog/index.html") %}
-{{menu.menuFromCollection(type="links", collection=collections.blog)}}
+{{menu.fromCollection(type="links", collection=collections.blog)}}
 {% endcall %}
 
 {{menu.link("/about.html", "About")}}
 
+{#
 {% call menu.submenu(label="dummy", hasLink="https://www.mit.edu/") %}
-{{menu.menuFromCollection (type="actions", collection=[
+{{menu.fromCollection (type="actions", collection=[
 {name: "action1", label: "do something"},
 {name: "action2", label: "do something else"}
 ])}}
 {% endcall %}
+#}
 {% endcall %}
 {% endblock siteNavigation %}
 </nav>
