@@ -2,6 +2,7 @@ const html = require("./html.js");
 const marked = require ("marked");
 const fs = require("fs");
 const express = require("express");
+const buildSite = require("../build.js");
 
 module.exports = function admin (req, res) {
 
@@ -19,11 +20,9 @@ return;
 } // try
 
 res.send(html.htmlResponse("edit...", html.editForm(content)));
-req.app.use(express.urlencoded());
 req.app.post("/admin/" + path(req.path), receiveContent);
 } // admin
 
-/// login
 
 
 
@@ -36,6 +35,7 @@ const content = req.body.content;
 
 try {
 fs.writeFileSync("source/" + path(req.path), content);
+buildSite();
 
 } catch (e) {
 res.send(html.errorResponse(e));
@@ -44,7 +44,7 @@ res.end();
 
 res.send(html.htmlResponse("save complete",
 `<p role="alert">Save Complete</p>
-${content}
+${html.editForm(content)}
 `)); // send
 res.end();
 } // receiveContent
