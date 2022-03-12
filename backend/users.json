@@ -1,9 +1,51 @@
 {
-"template": {
-"name": "",
-"firstName": "", "lastName": "",
-"eMail": "",
-"password": ""
-},
-"users": []
+  "template": {
+    "name": "",
+    "firstName": "",
+    "lastName": "",
+    "eMail": "",
+    "password": ""
+  },
+  "users": [
+    {
+      "firstName": "Rich",
+      "lastName": "Caloggero",
+      "name": "rich",
+      "eMail": "rich@somewhere.com",
+      "password": [
+        116,
+        250,
+        83,
+        39,
+        204,
+        15,
+        78,
+        148,
+        119,
+        137,
+        221,
+        94,
+        152,
+        154,
+        97,
+        168,
+        36,
+        41,
+        134,
+        165,
+        150,
+        241,
+        112,
+        100,
+        10,
+        201,
+        3,
+        55,
+        177,
+        218,
+        30,
+        228
+      ]
+    }
+  ]
 }

@@ -12,16 +12,6 @@ ${body(content)}
 `;
 } // content
 
-function editForm (content) {
-return `<form method="post" action="#">
-<textarea  autofocus name="content" rows=30 cols="80">
-${content}
-</textarea>
-<hr>
-<input type="submit" name="submit">
-</form>
-`;
-} // editContent
 
 function head (title) {
 return `<head>
@@ -42,7 +32,7 @@ ${content}
 /// exports
 
 module.exports = {
-errorResponse, htmlResponse, editForm,
+errorResponse, htmlResponse,
 head, body
 };
 

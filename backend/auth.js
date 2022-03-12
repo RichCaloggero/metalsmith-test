@@ -1,20 +1,29 @@
-console.log("authentication: ", process.cwd());
-
 const fs = require("fs");
 const db = readDatabase();
-const users = db.users;
 const template = db.template;
+const crypto = require("crypto");
 
-const createHash = require("crypto");
 
+function deleteAllUsers () {
+db.users = [];
+writeDatabase(db);
+} // deleteAllUsers
+
+function countUsers () {
+return a.db.users.length;
+} // countUsers
 
 function add (info) {
 if (validateInfo(info) && not(getUser(info))) {
-info.password = hash(info.password);
-users.push(info);
-db.users = users;
+const _info = Object.assign({}, info);
+_info.password = hash(_info.password);
+db.users.push(_info);
+console.log("add: ", db.users.length, _info);
 writeDatabase(db);
+return true;
 } // if
+
+return false;
 } // add
 
 function validateInfo (info) {
@@ -22,19 +31,28 @@ return Object.keys(template).every(key =>
 info.hasOwnProperty(key) && typeof(info[key]) === typeof(template[key]));
 } // validateInfo
 
-function login (nameOrEmail, password) {
+function login (eMail, password) {
 password = hash(password);
-const user = find("userName", nameOrEmail) || find("eMail", nameOrEmail);
-return user && hashMatch(password, user.password);
+const user = find("name", eMail);
+
+if (user.length === 0) {
+console.error(`login:  ${eMail} not found`);
+return false;
+} else if (user.length > 1) {
+console.error("login: too many users with same eMail", user.length, eMail);
+return false;
+} // if
+
+return hashMatch(password, user[0].password);
 } // login
 
 function getUser (info = {}) {
 const matches = Object.entries(info).map(entry => find(...entry)).flat(9);
 return identical(matches);
-} // validate
+} // getUser
 
 function find (key, value) {
-return users.map(user => user[key] === value);
+return db.users.filter(user => user[key] === value);
 } // find
 
 function identical (a) {
@@ -54,18 +72,13 @@ fs.writeFileSync("./backend/users.json", JSON.stringify(db, null, 2));
 function hash (message) {
 const _hash = crypto.createHash("sha256");
 _hash.update(message);
-return _hash.digest();
+return [..._hash.digest().values()];
 } // hash
 
 function hashMatch (h1, h2) {
-if (h1.length !== h2.length) return false;
-const value1 = h1.values(), value2 = h2.values();
+if (not(h1) || not(h2) || h1.length !== h2.length) return false;
 
-while (value1.next() === value2.next()) {
-if (value1.done || value2.done) return false;
-} // while
-
-return true;
+return h1.every((x, i) => x === h2[i]);
 } // hashMatch 
 
 function not (x) {return !Boolean(x);}
@@ -82,7 +95,7 @@ password: "frog"
 /// exports
 
 module.exports = {
-info, validateInfo, db,
-getUser, login, find, add
+info, validateInfo, db, hash, hashMatch, readDatabase, writeDatabase, deleteAllUsers,
+countUsers, getUser, login, find, add
 };
 

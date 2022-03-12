@@ -1,18 +1,16 @@
 const express = require('express')
 const app = express()
 const router = express.Router();
+const auth = require("./auth.js");
+const admin = require ("./admin.js");
 
-app.use(express.urlencoded());
+app.use(express.urlencoded({extended: true}));
 app.use(express.static("site"));
-app.get("/admin/*", login, require("./admin.js"));
+app.get("/admin/*", admin.login, admin.editFile);
 
 app.listen(8000);
 console.log("listening on port 8000...");
 
 
-function login (req, res, next) {
-next();
-res.end();
-} // login
 
 function not (x) {return !Boolean(x);}
