@@ -52,16 +52,26 @@ res.end();
 /// authentication
 
 function login (req, res, next) {
+console.log("login: ", req.app.get("path"), req.app.get("authenticated"));
+if (not(req.app.get("authenticated"))) {
+req.app.set("path", path(req.path));
 res.send(html.htmlResponse("Login", loginForm()));
-authenticate(req, res, next);
+} else {
+next();
+} // if
 } // login
 
 function authenticate (req, res, next) {
-req.app.post("/login", (req, res, next) => {
-const name = req.body.name;
+const eMail = req.body.eMail;
 const password = req.body.password;
-console.log(`login: ${name}, ${password.length} bytes, ${auth.login(name, password)}`);
-}); // post
+console.log("authenticate: ", eMail, password, auth.login(eMail,password));
+
+if (auth.login(eMail, password)) {
+req.app.set("authenticated", true);
+res.location(req.app.get("path"));
+} else {
+next("route");
+} // if
 } // authenticate
 
 function path (path) {
@@ -85,7 +95,7 @@ function loginForm (tryAgain) {
 return `
 ${tryAgain? '<p role="alert">Invalid credentials; try again.</p>' : ''}
 <form method="post" action="/login">
-<label>User name or eMail: <input type="text" name="name"></label>
+<label>eMail: <input type="text" name="eMail"></label>
 <label>Password: <input type="password" name="password"></label>
 <input type="submit" name="submit">
 </form>
@@ -95,5 +105,5 @@ ${tryAgain? '<p role="alert">Invalid credentials; try again.</p>' : ''}
 /// exports
 
 module.exports = {
-editFile, login
+editFile, login, authenticate
 };

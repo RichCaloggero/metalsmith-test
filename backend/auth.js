@@ -33,17 +33,17 @@ info.hasOwnProperty(key) && typeof(info[key]) === typeof(template[key]));
 
 function login (eMail, password) {
 password = hash(password);
-const user = find("name", eMail);
+const user = find("eMail", eMail);
 
 if (user.length === 0) {
 console.error(`login:  ${eMail} not found`);
-return false;
+return null;
 } else if (user.length > 1) {
 console.error("login: too many users with same eMail", user.length, eMail);
-return false;
+return null;
 } // if
 
-return hashMatch(password, user[0].password);
+return hashMatch(password, user[0].password)? user : null;
 } // login
 
 function getUser (info = {}) {

@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Login</title>
+</head>
+<body>
+<main>
+<div role="form" class="login">
+<label>eMail: <input type="text" class="eMail"></label>
+<label>Password: <input type="password" class="password"></label>
+<button class="login">login</button>
+</div>
+</main>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+{ // global scope
+const socket = io();
+
+$(".login").addEventListener("click", handleLogin);
+socket.on("login:success", getFileList);
+$(".fileList").addEventListener("click", getFile);
+$(".update").addEventListener("click", updateFile);
+
+
+socket.on("connect", () => {
+console.log("connected...");
+});
+
+socket.on("disconnect", () => {
+console.log("disconnected.");
+});
+
+
+
+function $ (s, c = document) {return c.querySelector(s);}
+function $$ (s, c = document) {return [...c.querySelectorAll(s)];}
+
+</script>
+
+</body>
+</html>

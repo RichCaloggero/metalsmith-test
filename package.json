@@ -9,7 +9,8 @@
     "@metalsmith/markdown": "*",
     "express": "^4.17.3",
     "jstransformer-nunjucks": "*",
-    "metalsmith": "*"
+    "metalsmith": "*",
+    "socket.io": "^4.4.1"
   },
   "devDependencies": {
     "metalsmith-auto-collections": "^0.2.0",
@@ -21,7 +22,7 @@
     "site": "npm run build && npm run serve",
     "backend": "node backend/server.js",
     "monitor-build": "start \"build\" nodemon -e njk,md,mac -w source -w layouts run-build.js",
-    "monitor-backend": "start \"backend\" nodemon -w backend backend/server.js",
+    "monitor-backend": "start \"backend\" nodemon -e js -w backend backend/server.js",
     "monitor": "npm run monitor-build & npm run monitor-backend"
   }
 }
