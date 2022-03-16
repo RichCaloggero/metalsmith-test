@@ -6,7 +6,7 @@ export function registerSocketEvents (socket, eventHandlers) {
 socket.onAny((event, ...args) => {
 if (eventHandlers[event] instanceof Function) {
 eventHandlers[event](...args);
-console.log("handling socket event: ", eventHandlers[event], event, args);
+//console.log("handling socket event: ", eventHandlers[event], event, args);
 
 } else {
 if (eventHandlers[event]) statusMessage(`${event}: invalid handler registered; must be a function`);
@@ -17,7 +17,7 @@ else statusMessage(`Unrecognized socket event: ${event}.`);
 
 
 export function registerDomEvents (eventDescriptors) {
-console.log("registerDomEvents: ", Object.keys(eventDescriptors).length);
+//console.log("registerDomEvents: ", Object.keys(eventDescriptors).length);
 Object.keys(eventDescriptors).forEach(selector => {
 const descriptor = eventDescriptors[selector];
 const element = document.querySelector(selector);
@@ -29,7 +29,7 @@ const eventTypes = Array.isArray(descriptor.type)? descriptor.type : [descriptor
 eventMap.set(element, {handler: descriptor.handler, type: eventTypes});
 } // if
 }); // keys
-console.log(eventMap.size, " events registered");
+//console.log(eventMap.size, " events registered");
 
 document.addEventListener("click", handleEvents);
 document.addEventListener("change", handleEvents);
@@ -41,7 +41,7 @@ function handleEvents (e) {
 const element = e.target;
 const descriptor = eventMap.get(element);
 if (descriptor && descriptor.type.includes(e.type)) {
-console.log("executing: ", descriptor.type, ", ", descriptor.handler);
+//console.log("executing: ", descriptor.type, ", ", descriptor.handler);
 descriptor.handler(e);
 } // if
 } // handleEvents

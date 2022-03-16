@@ -48,7 +48,9 @@ import {$, $$, not, statusMessage} from "./utilities.js";
 import {registerDomEvents, registerSocketEvents} from "./eventRegistration.js";
 
 
-const socket = io();
+const socket = io({
+rememberUpgrade: true,
+});
 statusMessage("Ready.");
 let userInfo = null;
 
@@ -106,6 +108,10 @@ $(".file-list").appendChild(option);
 showContent($("#edit-file"));
 $(".file-list").dispatchEvent(new CustomEvent("change", {bubbles: true}));
 $(".file-list").focus();
+window.addEventListener("beforeunload", e => {
+(e || window.event).returnValue = "Oh please don't go!";
+//return "Oh please don't go!";
+}); // prevent accidental refresh / leave
 } // displayFileList
 
 function loginFailed () {
@@ -113,8 +119,8 @@ statusMessage("Invalid credentials; please try again.");
 } // loginFailed
 
 
-function updateSuccessful () {
-statusMessage("Update successful.");
+function updateSuccessful (data) {
+statusMessage(`${data.name}: Update successful.`);
 } // updateSuccessful
 
 function displayFileContents (data) {

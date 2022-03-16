@@ -15,6 +15,7 @@ cors: {origin: "http://localhost:8000"}
 
 const auth = require("./auth.js");
 const file = require("./file.js");
+const build = require("../build.js");
 const activeSockets = new Map();
 
 express.static.mime.define({"text/javascript": "js"});
@@ -83,8 +84,10 @@ console.log("sendFile: ", data);
 
 function updateFile (data) {
 if (validLogin()) {
-console.log("updateFile: ", data);
 fs.writeFileSync(data.name, data.contents);
+build();
+socket.emit("updateSuccessful", {name: data.name});
+console.log("updateFile: ", data);
 } // if
 } // updateFile
 
@@ -102,7 +105,6 @@ server.listen(3000, () => {
 console.log("Listening on port 3000");
 });
 
-
 function sendClient (req, res, next) {
 const url = path.parse(req.url);
 const name = url.ext.toLowerCase() === ".js"? url.base
@@ -110,5 +112,6 @@ const name = url.ext.toLowerCase() === ".js"? url.base
 console.log("sendFile: ", req.url, url.ext, name);
 
 res.sendFile(name, {root: "./backend/client"});
-} // sendLoginPage
+} // sendClient
+
 
