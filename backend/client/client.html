@@ -1,0 +1,148 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Login</title>
+</head>
+<body>
+<nav>
+<a href="/">Home</a>
+<button class="userInfo">User info</button>
+<button class="logout">Logout</button>
+</nav>
+<main>
+<div role="status" id="status"></div>
+
+<div class="page" id="login">
+<h1 class="page-title">Login</h1>
+<label>eMail: <input type="email" autofocus class="eMail"></label>
+<label>Password: <input type="password" class="password"></label>
+<button class="login">login</button>
+</div><!-- login page -->
+
+<div class="page" id="edit-file" hidden>
+<h1 class="page-title">Edit File</h1>
+<label>File to edit:
+<br><select class="file-list"></select>
+</label>
+<hr>
+<textarea class="file-contents" rows="30" cols="80"></textarea>
+<hr>
+<button class="update">Update</button>
+
+</div><!-- edit file page -->
+
+<div class="page" id="user-info" hidden>
+<label>First name: <input type="text" class="first-name"></label>
+<label>Last name: <input type="text" class="last-name"></label>
+<br><label>eMail: <input type="email" class="email"></label>
+<label>Password: <input type="password" class="password"></label>
+<br><br><button class="change-info">Update</button>
+</div><!-- user-info page -->
+
+</main>
+
+<script src="/socket.io/socket.io.js"></script>
+<script type="module">
+import {$, $$, not, statusMessage} from "./utilities.js";
+import {registerDomEvents, registerSocketEvents} from "./eventRegistration.js";
+
+
+const socket = io();
+statusMessage("Ready.");
+let userInfo = null;
+
+registerDomEvents({
+"#login .login": {handler: requestLogin},
+"#edit-file .file-list": {type: "change", handler: requestFile},
+"#edit-file .update": {handler: requestFileUpdate},
+});
+
+registerSocketEvents(socket, {
+fileList: displayFileList,
+fileContents: displayFileContents,
+userInfo: displayUserInfo,
+registerUser, loginFailed, updateSuccessful
+});
+
+
+socket.onAny(data => console.log("log: received event ", data));
+
+/// dom event handlers
+
+function requestLogin () {
+socket.emit("requestLogin", {eMail: $(".eMail").value, password: $(".password").value});
+} // requestLogin
+
+function requestFile () {
+const name = $("#edit-file .file-list").value;
+console.log(`requesting file ${name}`);
+socket.emit("requestFile", {name});
+} // requestFile
+
+function requestFileUpdate (e) {
+const name = $("#edit-file .file-list").value;
+const contents = $("#edit-file .file-contents").value;
+
+socket.emit("requestFileUpdate", {name, contents});
+} // requestFileUpdate
+
+
+function requestUserInfo () {
+socket.emit("requestUserInfo");
+} // requestUserInfo
+
+/// socket event handlers
+
+
+function displayFileList (data) {
+userInfo = data.userInfo;
+data.fileList.forEach(item => {
+const option = document.createElement("option");
+option.textContent = item;
+$(".file-list").appendChild(option);
+}); // forEach
+
+showContent($("#edit-file"));
+$(".file-list").dispatchEvent(new CustomEvent("change", {bubbles: true}));
+$(".file-list").focus();
+} // displayFileList
+
+function loginFailed () {
+statusMessage("Invalid credentials; please try again.");
+} // loginFailed
+
+
+function updateSuccessful () {
+statusMessage("Update successful.");
+} // updateSuccessful
+
+function displayFileContents (data) {
+console.log("displayFileContents: ", data);
+$(".file-contents").textContent = data.contents;
+} // displayFileContents
+
+
+function registerUser () {
+socket.emit("registerUser");
+} // registerUser
+
+
+function displayUserInfo (data) {
+
+showContent($("#user-info"));
+} // displayUserInfo
+
+function showContent (container) {
+const title = $(".page-title", container).textContent;
+$$("main > .page").forEach(page => page.hidden = not(page === container));
+$("title").textContent = title;
+$(".page-title", container).tabIndex = -1;
+$(".page-title", container).focus();
+} // showContent
+
+
+</script>
+
+</body>
+</html>
