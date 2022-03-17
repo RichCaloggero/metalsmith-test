@@ -45,7 +45,8 @@
 <script src="/socket.io/socket.io.js"></script>
 <script type="module">
 import {$, $$, not, statusMessage} from "./utilities.js";
-import {registerDomEvents, registerSocketEvents} from "./eventRegistration.js";
+import {registerDomEvents} from "./eventRegistration.js";
+import {registerSocketEvents} from "./socketEvents.js";
 
 
 const socket = io({
@@ -64,7 +65,7 @@ registerSocketEvents(socket, {
 fileList: displayFileList,
 fileContents: displayFileContents,
 userInfo: displayUserInfo,
-registerUser, loginFailed, updateSuccessful
+registerUser, loginComplete, loginFailed, updateSuccessful
 });
 
 
@@ -96,10 +97,14 @@ socket.emit("requestUserInfo");
 
 /// socket event handlers
 
-
-function displayFileList (data) {
+function loginComplete (socket, data) {
 userInfo = data.userInfo;
-data.fileList.forEach(item => {
+socket.emit("requestFileList");
+} // loginComplete
+
+function displayFileList (socket, data) {
+console.log("fileList: ", data);
+data.forEach(item => {
 const option = document.createElement("option");
 option.textContent = item;
 $(".file-list").appendChild(option);
@@ -119,22 +124,22 @@ statusMessage("Invalid credentials; please try again.");
 } // loginFailed
 
 
-function updateSuccessful (data) {
+function updateSuccessful (socket, data) {
 statusMessage(`${data.name}: Update successful.`);
 } // updateSuccessful
 
-function displayFileContents (data) {
+function displayFileContents (socket, data) {
 console.log("displayFileContents: ", data);
 $(".file-contents").textContent = data.contents;
 } // displayFileContents
 
 
-function registerUser () {
+function registerUser (socket, data) {
 socket.emit("registerUser");
 } // registerUser
 
 
-function displayUserInfo (data) {
+function displayUserInfo (socket, data) {
 
 showContent($("#user-info"));
 } // displayUserInfo
