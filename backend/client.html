@@ -13,7 +13,7 @@
 <main>
 <div role="status" id="status"></div>
 
-<div class="page" id="login">
+<div class="page" id="login" hidden>
 <h1 class="page-title">Login</h1>
 <form>
 <label>eMail: <input required type="email" autofocus class="e-mail"></label>
@@ -74,6 +74,7 @@ registerSocketEvents(socket, {
 fileList: displayFileList,
 fileContents: displayFileContents,
 fileUpdateComplete,
+requestLogin: showLogin,
 loginComplete, loginFailed,
 forceLogout: logout,
 userInfoUpdateComplete, userInfoUpdateFailed,
@@ -84,6 +85,7 @@ addUserComplete, addUserFailed
 document.addEventListener("submit", e => e.preventDefault());
 
 /// dom event handlers
+
 
 function requestUpdateUserInfo () {
 const newInfo = getUserInfo();
@@ -173,6 +175,12 @@ socket.emit("requestFileList");
 console.log("userInfo: ", userInfo);
 } // loginComplete
 
+
+function showLogin () {
+window.removeEventListener("beforeunload", unloadHandler);
+showContent($("#login"));
+$("#login .e-mail").focus();
+} // showLogin
 
 function logout () {
 window.removeEventListener("beforeunload", unloadHandler);

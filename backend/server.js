@@ -32,11 +32,9 @@ console.log(`Connection established via ${socket.conn.transport.name}: ${socket.
 socket.conn.once("upgrade", () => {
 console.log(`${socket.id} upgraded transport to ${socket.conn.transport.name}`);
 }); // log connection
-socket.onAny((event, ...data) => {
-console.log("received: ", event, data);
-}); // log events
 
 activeSockets.set(socket, {}); // maintain state
+requestLogin(socket);
 
 registerSocketEvents(socket, {
 requestLogin: {handler: login, response: ["loginComplete", "loginFailed"]},
@@ -65,10 +63,9 @@ return userInfo? activeSockets.get(socket).userInfo = Object.assign({}, userInfo
 : null;
 } // login
 
-function logout (socket, data) {
-activeSockets.delete(socket);
-return true;
-} // logout
+function requestLogin (socket, data) {
+socket.emit("requestLogin");
+} // forceLogout
 
 function fileList (socket, data) {
 if (validLogin(socket)) {
@@ -114,6 +111,7 @@ console.log("error: ", data);
 function handleSocketDisconnect (socket, data) {
 activeSockets.delete(socket);
 console.log(`socket ${socket.id} disconnected;  ${data}`);
+console.log(`${activeSockets.size} active sockets found.`);
 } // handleSocketDisconnect
 
 function validLogin (socket) {
