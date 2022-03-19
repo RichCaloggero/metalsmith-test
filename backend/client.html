@@ -74,11 +74,13 @@ registerSocketEvents(socket, {
 fileList: displayFileList,
 fileContents: displayFileContents,
 fileUpdateComplete,
-loginComplete, loginFailed, userInfoUpdateComplete, userInfoUpdateFailed
+loginComplete, loginFailed,
+forceLogout: logout,
+userInfoUpdateComplete, userInfoUpdateFailed,
+addUserComplete, addUserFailed
 });
 
 
-socket.onAny(data => console.log("log: received event ", data));
 document.addEventListener("submit", e => e.preventDefault());
 
 /// dom event handlers
@@ -124,7 +126,7 @@ $("#login .e-mail").focus();
 } // userInfoUpdateComplete
 
 function userInfoUpdateFailed (socket, data) {
-statusMessage("Update failed.");
+statusMessage(data);
 } // userInfoUpdateFailed
 
 function addUserComplete (socket, data) {
@@ -134,7 +136,7 @@ $("#login .e-mail").focus();
 } // addUserComplete
 
 function addUserFailed (socket, data) {
-statusMessage("Update failed.");
+statusMessage(data);
 } // addUserFailed
 
 
@@ -178,7 +180,12 @@ window.location = window.location;
 } // logout
 
 function displayUserInfo () {
-if (userInfo) populateUserInfo(userInfo);
+$("#user-info .e-mail").removeAttribute("readonly");
+if (userInfo) {
+// we're logged in, so not allowed to change eMail
+populateUserInfo(userInfo);
+$("#user-info .e-mail").setAttribute("readonly", "");
+} // if
 showContent ($("#user-info"));
 $("#user-info .first-name").focus();
 } // displayUserInfo

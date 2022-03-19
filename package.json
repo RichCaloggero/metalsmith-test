@@ -22,8 +22,6 @@
     "serve": "run-server",
     "site": "npm run build && npm run serve",
     "backend": "node backend/server.js",
-    "monitor-build": "start \"build\" nodemon -e njk,md,mac -w source -w layouts run-build.js",
-    "monitor-backend": "start \"backend\" nodemon -e js,html -w backend backend/socketServer-https.js",
-    "monitor": "npm run monitor-build & npm run monitor-backend"
+    "monitor-backend": "start \"backend\" nodemon -e js,html -w backend backend/server.js"
   }
 }

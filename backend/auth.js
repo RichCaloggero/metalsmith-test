@@ -1,7 +1,8 @@
-const fs = await import("fs");
+import fs from "fs";
+import crypto from "crypto";
+
 const db = readDatabase();
 const template = db.template;
-const crypto = await import("crypto");
 
 
 export function deleteAllUsers () {
@@ -23,7 +24,7 @@ writeDatabase(db);
 return true;
 } // if
 
-return false;
+return {response: `add user: eMail ${info.eMail} already exists.`};
 } // addUser
 
 export function updateUserInfo (info) {
@@ -38,7 +39,7 @@ writeDatabase(db);
 return true;
 } // if
 
-return false;
+return {response: `update user: eMail ${info.eMail} does not match that of the currently logged in user.`};
 } // updateUserInfo
 
 export function validateInfo (info) {

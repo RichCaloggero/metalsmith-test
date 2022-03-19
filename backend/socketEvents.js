@@ -15,21 +15,29 @@ sendResponse(socket, descriptor.handler(socket, ...args), descriptor.response);
 } // registerSocketEvents
 
 function sendResponse (socket, handlerResponse, response) {
-if (response) {
+if (not(response)) return;
+
 if (typeof(response) === "string" && handlerResponse) {
 socket.emit(response, handlerResponse);
 console.log("response sent: ", response, handlerResponse);
 } else if (Array.isArray(response) && response.length > 0) {
-const [success, failure] = response;
-if (handlerResponse) {
-socket.emit(success, handlerResponse);
-console.log("- sent success: ", response, handlerResponse);
-} else if(failure) {
-socket.emit(failure);
-console.log("- sent failure: ", response, handlerResponse);
-} // if
+const [successEvent, failureEvent] = response;
+
+// these two lines allow returning an object from handler with status and/or response properties
+// if status exists and is truthy then use it, otherwise use use handlerResponse
+// if success is falsey and failureEvent is defined then pass back failureResponse with the event
+const success = handlerResponse && typeof(handlerResponse) === "object" && handlerResponse.hasOwnProperty("status")? handlerResponse.status : handlerResponse;
+const failureResponse = handlerResponse && typeof(handlerResponse) === "object" && handlerResponse.hasOwnProperty("response")? handlerResponse.response : null;
+
+if (success) {
+socket.emit(successEvent, handlerResponse);
+console.log("- sent success: ", handlerResponse);
+} else if(failureEvent) {
+socket.emit(failureEvent, failureResponse);
+console.log("- sent failure: ", failureResponse);
 } // if
 } // if
 } // sendResponse
 
+function not (x) {return !Boolean(x);}
 
