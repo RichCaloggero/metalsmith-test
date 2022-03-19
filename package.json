@@ -1,5 +1,6 @@
 {
   "name": "static-site",
+  "type": "module",
   "private": true,
   "dependencies": {
     "@metalsmith/collections": "^1.2.1",

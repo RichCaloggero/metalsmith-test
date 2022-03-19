@@ -1,12 +1,13 @@
-module.exports = function build () {
-try {
-const metalsmith = require("metalsmith"),
-collections = require("@metalsmith/collections"),
-autoCollections = require("metalsmith-auto-collections"),
-layout = require("@metalsmith/layouts"),
-markdown = require("@metalsmith/markdown"),
-excerpts = require("@metalsmith/excerpts");
+import metalsmith from "metalsmith";
+import collections from "@metalsmith/collections";
+import autoCollections  from "metalsmith-auto-collections";
+import layout from "@metalsmith/layouts";
+import markdown from "@metalsmith/markdown";
+import excerpts from "@metalsmith/excerpts";
 
+
+export default function build () {
+try {
 const siteTitle = "My Metalsmith-powered Static Site";
 const source = "./source";
 const destination = "./site";
@@ -29,9 +30,10 @@ description: "Experimenting with metalsmith."
 .build(function(err) {     
 if (err) throw new Error(err);
 });
-
 console.log ("Build complete.");
+
 } catch (e) {
 console.error(e);
 } // try
 } // build
+

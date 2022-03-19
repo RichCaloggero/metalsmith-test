@@ -1,5 +1,5 @@
 
-module.exports = function registerSocketEvents (socket, descriptors) {
+export default function registerSocketEvents (socket, descriptors) {
 socket.onAny((event, ...args) => {
 const descriptor = descriptors[event];
 if (!descriptor) return;

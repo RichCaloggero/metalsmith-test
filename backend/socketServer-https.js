@@ -1,22 +1,24 @@
-const fs = require("fs");
-const path = require("path");
-const express = require("express");
+import * as fs from "fs";
+import * as path from "path";
+import express from "express";
 const app = express();
 
-const server = require("https").createServer({
+import * as https from "https";
+const server = https.createServer({
 key: fs.readFileSync("RootCA.key"),
 cert: fs.readFileSync("RootCA.crt"),
 requestCert: false,
 rejectUnauthorized: false
 }, app);
-const io = require('socket.io')(server, {
+
+import * as socketIO from "socket.io";
+const io = new socketIO.Server(server, {
 cors: {origin: "http://localhost:8000"}
 });
 
-const auth = require("./auth.js");
-const file = require("./file.js");
-const build = require("../build.js");
-const registerSocketEvents = require("./socketEvents.js");
+import * as auth from "./auth.js";
+import build from "../build.js";
+import registerSocketEvents from "./socketEvents.js";
 
 const activeSockets = new Map();
 
@@ -76,7 +78,7 @@ return (activeSockets.get(socket).fileList = getFileList(socket));
 } // fileList
 
 function getFileList () {
-return file.getAllFiles("source");
+return getAllFiles("source");
 } // getFileList
 
 function fileContents (socket, data) {
@@ -125,7 +127,22 @@ const name = url.ext.toLowerCase() === ".js"? url.base
 : "client.html";
 console.log("sendFile: ", req.url, url.ext, name);
 
-res.sendFile(name, {root: "./backend/client"});
+res.sendFile(name, {root: "./backend"});
 } // sendClient
 
 
+function getAllFiles  (dirPath, list = []) {
+const files = fs.readdirSync(dirPath);
+
+files.forEach(file => {
+const _file = dirPath + "/" + file;
+if (fs.statSync(_file).isDirectory()) {
+list = getAllFiles(_file, list);
+} else {
+list.push(
+path.join(dirPath, "/", file));
+} // if
+}); // forEach
+
+return list;
+} // getAllFiles

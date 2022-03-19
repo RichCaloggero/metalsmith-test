@@ -51,8 +51,8 @@
 <script src="/socket.io/socket.io.js"></script>
 <script type="module">
 import {$, $$, not, statusMessage} from "./utilities.js";
-import {registerDomEvents} from "./eventRegistration.js";
-import {registerSocketEvents} from "../socketEvents.js";
+import {registerDomEvents} from "./domEvents.js";
+import registerSocketEvents from "./socketEvents.js";
 
 
 const socket = io({

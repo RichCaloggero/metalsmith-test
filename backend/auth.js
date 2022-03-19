@@ -1,19 +1,19 @@
-const fs = require("fs");
+const fs = await import("fs");
 const db = readDatabase();
 const template = db.template;
-const crypto = require("crypto");
+const crypto = await import("crypto");
 
 
-function deleteAllUsers () {
+export function deleteAllUsers () {
 db.users = {};
 writeDatabase(db);
 } // deleteAllUsers
 
-function countUsers () {
+export function countUsers () {
 return Object.keys(db.users);
 } // countUsers
 
-function addUser (info) {
+export function addUser (info) {
 if (validateInfo(info) && not(getUser(info.eMail))) {
 const newInfo = Object.assign({}, info);
 newInfo.password = hash(info.password);
@@ -26,7 +26,7 @@ return true;
 return false;
 } // addUser
 
-function updateUserInfo (info) {
+export function updateUserInfo (info) {
 const oldInfo = validateInfo(info)? getUser(info.eMail) : null;
 console.log("updating user ", oldInfo, " with ", info);
 if (oldInfo) {
@@ -41,19 +41,19 @@ return true;
 return false;
 } // updateUserInfo
 
-function validateInfo (info) {
+export function validateInfo (info) {
 return Object.keys(template).every(key =>
 info.hasOwnProperty(key) && typeof(info[key]) === typeof(template[key]));
 } // validateInfo
 
-function login (eMail, password) {
+export function login (eMail, password) {
 password = hash(password);
 const user = getUser(eMail);
 
 return (user && hashMatch(password, user.password))? user : null;
 } // login
 
-function getUser (key = "") {
+export function getUser (key = "") {
 return db.users[key] || null;
 } // getUser
 
@@ -76,26 +76,17 @@ fs.writeFileSync("./backend/users.json", JSON.stringify(db, null, 2));
 } // writeDatabase
 
 
-function hash (message) {
+export function hash (message) {
 const _hash = crypto.createHash("sha256");
 _hash.update(message);
 return [..._hash.digest().values()];
 } // hash
 
-function hashMatch (h1, h2) {
+export function hashMatch (h1, h2) {
 if (not(h1) || not(h2) || h1.length !== h2.length) return false;
 
 return h1.every((x, i) => x === h2[i]);
 } // hashMatch 
 
 function not (x) {return !Boolean(x);}
-
-/// test
-
-/// exports
-
-module.exports = {
-validateInfo, db, hash, hashMatch, readDatabase, writeDatabase, deleteAllUsers,
-countUsers, getUser, login, find, addUser, updateUserInfo
-};
 

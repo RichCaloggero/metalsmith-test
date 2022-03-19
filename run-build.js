@@ -1,1 +1,2 @@
-require ("./build.js")();
+import build from "./build.js";
+build();
