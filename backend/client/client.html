@@ -7,7 +7,7 @@
 <body>
 <nav>
 <a href="/">Home</a>
-<button class="userInfo">User info</button>
+<button class="user-info">User info</button>
 <button class="logout">Logout</button>
 </nav>
 <main>
@@ -15,9 +15,11 @@
 
 <div class="page" id="login">
 <h1 class="page-title">Login</h1>
-<label>eMail: <input type="email" autofocus class="eMail"></label>
-<label>Password: <input type="password" class="password"></label>
+<form>
+<label>eMail: <input required type="email" autofocus class="e-mail"></label>
+<label>Password: <input required type="password" class="password"></label>
 <button class="login">login</button>
+</form>
 </div><!-- login page -->
 
 <div class="page" id="edit-file" hidden>
@@ -33,11 +35,15 @@
 </div><!-- edit file page -->
 
 <div class="page" id="user-info" hidden>
+<h1 class="page-title">User Info</h1>
+<form>
 <label>First name: <input type="text" class="first-name"></label>
 <label>Last name: <input type="text" class="last-name"></label>
-<br><label>eMail: <input type="email" class="email"></label>
-<label>Password: <input type="password" class="password"></label>
-<br><br><button class="change-info">Update</button>
+<br><label>eMail: <input required type="email" class="e-mail"></label>
+<br><label>Password: <input required type="password" class="password"></label>
+<label>Confirm password: <input required type="password" class="password-confirmation"></label>
+<br><br><button class="submit">Update</button>
+</form>
 </div><!-- user-info page -->
 
 </main>
@@ -56,25 +62,84 @@ statusMessage("Ready.");
 let userInfo = null;
 
 registerDomEvents({
+"nav .user-info": {handler: displayUserInfo},
+"nav .logout": {handler: logout},
 "#login .login": {handler: requestLogin},
 "#edit-file .file-list": {type: "change", handler: requestFile},
 "#edit-file .update": {handler: requestFileUpdate},
+"#user-info .submit": {handler: requestUpdateUserInfo},
 });
 
 registerSocketEvents(socket, {
 fileList: displayFileList,
 fileContents: displayFileContents,
-userInfo: displayUserInfo,
-registerUser, loginComplete, loginFailed, updateSuccessful
+fileUpdateComplete,
+loginComplete, loginFailed, userInfoUpdateComplete, userInfoUpdateFailed
 });
 
 
 socket.onAny(data => console.log("log: received event ", data));
+document.addEventListener("submit", e => e.preventDefault());
 
 /// dom event handlers
 
+function requestUpdateUserInfo () {
+const newInfo = getUserInfo();
+if (not(newInfo)) {
+statusMessage("Passwords do not match; please try again.");
+setTimeout(() => $("#user-info .password").focus(), 2000);
+return;
+} // if
+
+if (userInfo) {
+console.log("updating logged in user with ", newInfo);
+
+if (not(newInfo.eMail === userInfo.eMail)) {
+console.log("eMails do not match");
+statusMessage("eMail is incorrect; please try again.");
+$("#user-info .e-mail").focus();
+return;
+} // if
+
+socket.emit("requestUpdateUserInfo", newInfo);
+return;
+} // if
+
+console.log("adding new user: ", newInfo);
+socket.emit("requestAddUser", newInfo);
+} // updateUserInfo
+
+function getUserInfo () {
+const info = $("#user-info");
+const eMail = $(".e-mail", info).value, firstName = $(".first-name", info).value, lastName = $(".last-name", info).value, password1 = $(".password", info).value, password2 = $(".password-confirmation", info).value;
+return (password1 === password2)? 
+{eMail, firstName, lastName, password: password1}
+: null;
+} // getUserInfo
+
+function userInfoUpdateComplete (socket, data) {
+statusMessage("Changes saved.");
+showContent($("#login"));
+$("#login .e-mail").focus();
+} // userInfoUpdateComplete
+
+function userInfoUpdateFailed (socket, data) {
+statusMessage("Update failed.");
+} // userInfoUpdateFailed
+
+function addUserComplete (socket, data) {
+statusMessage("New user added.");
+showContent($("#login"));
+$("#login .e-mail").focus();
+} // addUserComplete
+
+function addUserFailed (socket, data) {
+statusMessage("Update failed.");
+} // addUserFailed
+
+
 function requestLogin () {
-socket.emit("requestLogin", {eMail: $(".eMail").value, password: $(".password").value});
+if ($("#login form").checkValidity()) socket.emit("requestLogin", {eMail: $("#login .e-mail").value, password: $("#login .password").value});
 } // requestLogin
 
 function requestFile () {
@@ -90,6 +155,9 @@ const contents = $("#edit-file .file-contents").value;
 socket.emit("requestFileUpdate", {name, contents});
 } // requestFileUpdate
 
+function fileUpdateComplete (socket, data) {
+statusMessage(`${data.name}: update complete.`);
+} // fileUpdateComplete
 
 function requestUserInfo () {
 socket.emit("requestUserInfo");
@@ -98,9 +166,28 @@ socket.emit("requestUserInfo");
 /// socket event handlers
 
 function loginComplete (socket, data) {
-userInfo = data.userInfo;
+userInfo = data;
 socket.emit("requestFileList");
+console.log("userInfo: ", userInfo);
 } // loginComplete
+
+
+function logout () {
+window.removeEventListener("beforeunload", unloadHandler);
+window.location = window.location;
+} // logout
+
+function displayUserInfo () {
+if (userInfo) populateUserInfo(userInfo);
+showContent ($("#user-info"));
+$("#user-info .first-name").focus();
+} // displayUserInfo
+
+function populateUserInfo (data) {
+$("#user-info .e-mail").value = data.eMail;
+$("#user-info .first-name").value = data.firstName;
+$("#user-info .last-name").value = data.lastName;
+} // populateUserInfo
 
 function displayFileList (socket, data) {
 console.log("fileList: ", data);
@@ -113,20 +200,19 @@ $(".file-list").appendChild(option);
 showContent($("#edit-file"));
 $(".file-list").dispatchEvent(new CustomEvent("change", {bubbles: true}));
 $(".file-list").focus();
-window.addEventListener("beforeunload", e => {
-(e || window.event).returnValue = "Oh please don't go!";
-//return "Oh please don't go!";
-}); // prevent accidental refresh / leave
+window.addEventListener("beforeunload", unloadHandler);
 } // displayFileList
+
+function unloadHandler (e) {
+(e || window.event).returnValue = "Oh please don't go!";
+return "Oh please don't go!";
+} // unloadHandler
 
 function loginFailed () {
 statusMessage("Invalid credentials; please try again.");
 } // loginFailed
 
 
-function updateSuccessful (socket, data) {
-statusMessage(`${data.name}: Update successful.`);
-} // updateSuccessful
 
 function displayFileContents (socket, data) {
 console.log("displayFileContents: ", data);
@@ -135,14 +221,10 @@ $(".file-contents").textContent = data.contents;
 
 
 function registerUser (socket, data) {
-socket.emit("registerUser");
+socket.emit("registerUser", userInfo);
 } // registerUser
 
 
-function displayUserInfo (socket, data) {
-
-showContent($("#user-info"));
-} // displayUserInfo
 
 function showContent (container) {
 const title = $(".page-title", container).textContent;

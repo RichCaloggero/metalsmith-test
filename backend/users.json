@@ -1,17 +1,15 @@
 {
   "template": {
-    "name": "",
     "firstName": "",
     "lastName": "",
     "eMail": "",
     "password": ""
   },
-  "users": [
-    {
+  "users": {
+    "rich@me": {
+      "eMail": "rich@me",
       "firstName": "Rich",
       "lastName": "Caloggero",
-      "name": "rich",
-      "eMail": "rich@somewhere.com",
       "password": [
         116,
         250,
@@ -47,5 +45,5 @@
         228
       ]
     }
-  ]
+  }
 }

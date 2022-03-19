@@ -41,6 +41,8 @@ requestLogin: {handler: login, response: ["loginComplete", "loginFailed"]},
 requestFileList: {handler: fileList, response: "fileList"},
 requestFile: {handler: fileContents, response: "fileContents"},
 requestFileUpdate: {handler: updateFile, response: "fileUpdateComplete"},
+requestUpdateUserInfo: {handler: updateUserInfo, response: ["updateUserInfoComplete", "updateUserInfoFailed"]},
+requestAddUser: {handler: addUser, response: ["addUserComplete", "addUserFailed"]},
 error: handleSocketError,
 disconnect: handleSocketDisconnect
 }); // registerEvents
@@ -48,7 +50,7 @@ disconnect: handleSocketDisconnect
 
 server.listen(3000, () => {
 console.log("Listening on port 3000");
-});
+}); // listen
 
 
 
@@ -56,8 +58,15 @@ console.log("Listening on port 3000");
 
 function login (socket, data) {
 console.log("login: ", data);
-return activeSockets.get(socket).userInfo = auth.login(data.eMail, data.password);
+const userInfo = auth.login(data.eMail, data.password);
+return userInfo? activeSockets.get(socket).userInfo = Object.assign({}, userInfo, {password: ""})
+: null;
 } // login
+
+function logout (socket, data) {
+activeSockets.delete(socket);
+return true;
+} // logout
 
 function fileList (socket, data) {
 if (validLogin(socket)) {
@@ -87,6 +96,14 @@ build();
 return {name: data.name};
 } // if
 } // updateFile
+
+function updateUserInfo (socket, data) {
+if (validLogin(socket)) return auth.updateUserInfo(data);
+} // updateUserInfo
+
+function addUser (socket, data) {
+return auth.addUser(data);
+} // addUser
 
 function handleSocketError (socket, data) {
 console.log("error: ", data);
