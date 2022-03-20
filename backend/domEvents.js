@@ -1,19 +1,5 @@
-import {not, statusMessage} from "./utilities.js";
+import {not, statusMessage} from "./domUtilities.js";
 const eventMap = new Map();
-
-
-export function registerSocketEvents (socket, eventHandlers) {
-socket.onAny((event, ...args) => {
-if (eventHandlers[event] instanceof Function) {
-eventHandlers[event](...args);
-//console.log("handling socket event: ", eventHandlers[event], event, args);
-
-} else {
-if (eventHandlers[event]) statusMessage(`${event}: invalid handler registered; must be a function`);
-else statusMessage(`Unrecognized socket event: ${event}.`);
-} // if
-}); //onAny
-} // registerSocketEvents
 
 
 export function registerDomEvents (eventDescriptors) {
@@ -41,6 +27,7 @@ function handleEvents (e) {
 const element = e.target;
 const descriptor = eventMap.get(element);
 if (descriptor && descriptor.type.includes(e.type)) {
+statusMessage("");
 //console.log("executing: ", descriptor.type, ", ", descriptor.handler);
 descriptor.handler(e);
 } // if

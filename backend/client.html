@@ -11,7 +11,6 @@
 <button class="logout">Logout</button>
 </nav>
 <main>
-<div role="status" id="status"></div>
 
 <div class="page" id="login" hidden>
 <h1 class="page-title">Login</h1>
@@ -50,11 +49,11 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script type="module">
-import {$, $$, not, statusMessage} from "./utilities.js";
+import {createStatusArea, $, $$, not, statusMessage} from "./domUtilities.js";
 import {registerDomEvents} from "./domEvents.js";
 import registerSocketEvents from "./socketEvents.js";
 
-
+createStatusArea();
 const socket = io({
 rememberUpgrade: true,
 });
