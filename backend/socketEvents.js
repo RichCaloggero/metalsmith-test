@@ -14,28 +14,21 @@ sendResponse(socket, descriptor.handler(socket, ...args), descriptor.response);
 }); // connectAny
 } // registerSocketEvents
 
-function sendResponse (socket, handlerResponse, response) {
-if (not(response)) return;
+function sendResponse (socket, handlerResponse, events) {
+if (not(events)) return;
 
-if (typeof(response) === "string" && handlerResponse) {
-socket.emit(response, handlerResponse);
-console.log("response sent: ", response, handlerResponse);
-} else if (Array.isArray(response) && response.length > 0) {
-const [successEvent, failureEvent] = response;
+const result = {status: false, error: "", response: null};
+if (typeof(handlerResponse) === "object") Object.assign(result, handlerResponse);
+else Object.assign(result, {status: true, response: handlerResponse});
 
-// these two lines allow returning an object from handler with status and/or response properties
-// if status exists and is truthy then use it, otherwise use use handlerResponse
-// if success is falsey and failureEvent is defined then pass back failureResponse with the event
-const success = handlerResponse && typeof(handlerResponse) === "object" && handlerResponse.hasOwnProperty("status")? handlerResponse.status : handlerResponse;
-const failureResponse = handlerResponse && typeof(handlerResponse) === "object" && handlerResponse.hasOwnProperty("response")? handlerResponse.response : null;
+if (typeof(events) === "string") events = [events];
+const [successEvent, failureEvent] = events;
 
-if (success) {
-socket.emit(successEvent, handlerResponse);
-console.log("- sent success: ", handlerResponse);
-} else if(failureEvent) {
-socket.emit(failureEvent, failureResponse);
-console.log("- sent failure: ", failureResponse);
-} // if
+if (result.status && successEvent) {
+socket.emit(successEvent, result.response);
+} else if (failureEvent) {
+if (result.error) socket.emit("error", result.error);
+else socket.emit(failureEvent, result.response);
 } // if
 } // sendResponse
 

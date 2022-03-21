@@ -24,22 +24,23 @@ writeDatabase(db);
 return true;
 } // if
 
-return {response: `add user: eMail ${info.eMail} already exists.`};
+return {error: `add user: eMail ${info.eMail} already exists.`};
 } // addUser
 
 export function updateUserInfo (info) {
-const oldInfo = validateInfo(info)? getUser(info.eMail) : null;
+if (not(validateInfo(info))) return {error: "invalid submission"};
+
+const oldInfo = getUser(info.eMail);
 console.log("updating user ", oldInfo, " with ", info);
-if (oldInfo) {
+if (not(oldInfo)) delete db.users[info.eMail];
+
 const newInfo = Object.assign({}, oldInfo, info);
 newInfo.password = hash(info.password);
 console.log("updateUserInfo: ", oldInfo, ", ", newInfo);
 db.users[info.eMail] = newInfo;
 writeDatabase(db);
-return true;
-} // if
 
-return {response: `update user: eMail ${info.eMail} does not match that of the currently logged in user.`};
+return true;
 } // updateUserInfo
 
 export function validateInfo (info) {

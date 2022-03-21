@@ -35,13 +35,15 @@
 
 <div class="page" id="user-info" hidden>
 <h1 class="page-title">User Info</h1>
+<p role="alert">If you change your eMail address, this account will be deleted since your user name is your eMail address.</p>
 <form>
 <label>First name: <input type="text" class="first-name"></label>
 <label>Last name: <input type="text" class="last-name"></label>
 <br><label>eMail: <input required type="email" class="e-mail"></label>
 <br><label>Password: <input required type="password" class="password"></label>
 <label>Confirm password: <input required type="password" class="password-confirmation"></label>
-<br><br><button class="submit">Update</button>
+<br><br><button class="delete">Delete</button>
+<button class="submit">Update</button>
 </form>
 </div><!-- user-info page -->
 
@@ -77,7 +79,8 @@ requestLogin: showLogin,
 loginComplete, loginFailed,
 forceLogout: logout,
 userInfoUpdateComplete, userInfoUpdateFailed,
-addUserComplete, addUserFailed
+addUserComplete, addUserFailed,
+error: handleSocketError
 });
 
 
@@ -97,12 +100,13 @@ return;
 if (userInfo) {
 console.log("updating logged in user with ", newInfo);
 
-if (not(newInfo.eMail === userInfo.eMail)) {
+/*if (not(newInfo.eMail === userInfo.eMail)) {
 console.log("eMails do not match");
 statusMessage("eMail is incorrect; please try again.");
 $("#user-info .e-mail").focus();
 return;
 } // if
+*/
 
 socket.emit("requestUpdateUserInfo", newInfo);
 return;
@@ -122,7 +126,7 @@ return (password1 === password2)?
 
 function userInfoUpdateComplete (socket, data) {
 statusMessage("Changes saved.");
-showContent($("#login"));
+showPage($("#login"));
 $("#login .e-mail").focus();
 } // userInfoUpdateComplete
 
@@ -132,7 +136,7 @@ statusMessage(data);
 
 function addUserComplete (socket, data) {
 statusMessage("New user added.");
-showContent($("#login"));
+showPage($("#login"));
 $("#login .e-mail").focus();
 } // addUserComplete
 
@@ -177,7 +181,8 @@ console.log("userInfo: ", userInfo);
 
 function showLogin () {
 window.removeEventListener("beforeunload", unloadHandler);
-showContent($("#login"));
+showPage($("#login"));
+$("#login .password").value = "";
 $("#login .e-mail").focus();
 } // showLogin
 
@@ -187,13 +192,13 @@ window.location = window.location;
 } // logout
 
 function displayUserInfo () {
-$("#user-info .e-mail").removeAttribute("readonly");
+//$("#user-info .e-mail").removeAttribute("readonly");
 if (userInfo) {
 // we're logged in, so not allowed to change eMail
 populateUserInfo(userInfo);
-$("#user-info .e-mail").setAttribute("readonly", "");
+//$("#user-info .e-mail").setAttribute("readonly", "");
 } // if
-showContent ($("#user-info"));
+showPage($("#user-info"));
 $("#user-info .first-name").focus();
 } // displayUserInfo
 
@@ -211,7 +216,7 @@ option.textContent = item;
 $(".file-list").appendChild(option);
 }); // forEach
 
-showContent($("#edit-file"));
+showPage($("#edit-file"));
 $(".file-list").dispatchEvent(new CustomEvent("change", {bubbles: true}));
 $(".file-list").focus();
 window.addEventListener("beforeunload", unloadHandler);
@@ -234,19 +239,18 @@ $(".file-contents").textContent = data.contents;
 } // displayFileContents
 
 
-function registerUser (socket, data) {
-socket.emit("registerUser", userInfo);
-} // registerUser
+function handleSocketError (socket, data) {
+statusMessage(`Error: ${data}`);
+} // handleSocketError
 
 
-
-function showContent (container) {
+function showPage(container) {
 const title = $(".page-title", container).textContent;
 $$("main > .page").forEach(page => page.hidden = not(page === container));
 $("title").textContent = title;
 $(".page-title", container).tabIndex = -1;
 $(".page-title", container).focus();
-} // showContent
+} // showPage
 
 
 </script>

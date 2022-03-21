@@ -97,7 +97,13 @@ return {name: data.name};
 } // updateFile
 
 function updateUserInfo (socket, data) {
-if (validLogin(socket)) return auth.updateUserInfo(data);
+if (validLogin(socket)) {
+if (not(auth.getUser(data.eMail).eMail === data.eMail)) return {error: `eMail ${data.eMail} already exists; try another.`};
+return auth.updateUserInfo(data);
+
+} else {
+return auth.addUser(data);
+} // if
 } // updateUserInfo
 
 function addUser (socket, data) {
@@ -144,3 +150,5 @@ path.join(dirPath, "/", file));
 
 return list;
 } // getAllFiles
+
+function not (x) {return !Boolean(x);}
