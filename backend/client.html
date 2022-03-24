@@ -62,57 +62,114 @@ rememberUpgrade: true,
 statusMessage("Ready.");
 let userInfo = null;
 
+
 registerDomEvents({
 "nav .user-info": {handler: displayUserInfo},
 "nav .logout": {handler: logout},
 "#login .login": {handler: requestLogin},
-"#edit-file .file-list": {type: "change", handler: requestFile},
+"#edit-file .file-list": {type: "change", handler: requestFileContents},
 "#edit-file .update": {handler: requestFileUpdate},
 "#user-info .submit": {handler: requestUpdateUserInfo},
 });
 
+
 registerSocketEvents(socket, {
-fileList: displayFileList,
-fileContents: displayFileContents,
-fileUpdateComplete,
-requestLogin: showLogin,
-loginComplete, loginFailed,
+displayLogin: showLogin,
 forceLogout: logout,
-userInfoUpdateComplete, userInfoUpdateFailed,
-addUserComplete, addUserFailed,
 error: handleSocketError
 });
-
-
 document.addEventListener("submit", e => e.preventDefault());
 
 /// dom event handlers
+
+
+
+function requestLogin () {
+if (not($("#login form").checkValidity())) return;
+console.log("requesting login...");
+
+socket.emit("requestLogin", {eMail: $("#login .e-mail").value, password: $("#login .password").value}, loginComplete);
+} // requestLogin
+
+function loginComplete (data) {
+if (data) {
+userInfo = data;
+console.log("- got response to requestLogin: ", userInfo);
+//debugger;
+socket.emit("requestFileList", null, displayFileList);
+
+} else {
+statusMessage("invalid credentials; try again");
+focus($("#login .eMail"));
+} // if
+} // loginComplete
+
+function displayFileList (data) {
+console.log("fileList: ", data);
+data.forEach(item => {
+const option = document.createElement("option");
+option.textContent = item;
+$(".file-list").appendChild(option);
+}); // forEach
+
+showPage($("#edit-file"));
+$(".file-list").dispatchEvent(new CustomEvent("change", {bubbles: true}));
+$(".file-list").focus();
+window.addEventListener("beforeunload", unloadHandler);
+} // displayFileList
+
+function requestFileContents () {
+const name = $("#edit-file .file-list").value;
+console.log(`requesting file ${name}`);
+socket.emit("requestFileContents", {name}, displayFileContents);
+} // requestFile
+
+function displayFileContents (data) {
+console.log("displayFileContents: ", data);
+$(".file-contents").textContent = data.contents;
+} // displayFileContents
+
+function requestFileUpdate (e) {
+const name = $("#edit-file .file-list").value;
+const contents = $("#edit-file .file-contents").value;
+
+socket.emit("requestFileUpdate", {name, contents}, fileUpdateComplete);
+} // requestFileUpdate
+
+function fileUpdateComplete (data) {
+statusMessage(`${data.name}: update complete.`);
+} // fileUpdateComplete
+
+
+function showLogin () {
+window.removeEventListener("beforeunload", unloadHandler);
+showPage($("#login"));
+$("#login .password").value = "";
+focus($("#login .e-mail"));
+} // showLogin
+
+function logout () {
+window.removeEventListener("beforeunload", unloadHandler);
+window.location = window.location;
+} // logout
 
 
 function requestUpdateUserInfo () {
 const newInfo = getUserInfo();
 if (not(newInfo)) {
 statusMessage("Passwords do not match; please try again.");
-setTimeout(() => $("#user-info .password").focus(), 2000);
+focus($("#user-info .password"));
 return;
 } // if
 
 if (userInfo) {
 console.log("updating logged in user with ", newInfo);
 
-/*if (not(newInfo.eMail === userInfo.eMail)) {
-console.log("eMails do not match");
-statusMessage("eMail is incorrect; please try again.");
-$("#user-info .e-mail").focus();
-return;
-} // if
-*/
-
-socket.emit("requestUpdateUserInfo", newInfo);
+socket.emit("requestUpdateUserInfo", newInfo, updateUserComplete);
 return;
 } // if
 
-console.log("adding new user: ", newInfo);
+console.log("adding new user: ", newInfo, addUserComplete);
 socket.emit("requestAddUser", newInfo);
 } // updateUserInfo
 
@@ -124,72 +181,21 @@ return (password1 === password2)?
 : null;
 } // getUserInfo
 
-function userInfoUpdateComplete (socket, data) {
+function userInfoUpdateComplete (data) {
+if (data) {
 statusMessage("Changes saved.");
 showPage($("#login"));
-$("#login .e-mail").focus();
+focus($("#login .e-mail"));
+} else {
+statusMessage("update failed.");
+} // if
 } // userInfoUpdateComplete
 
-function userInfoUpdateFailed (socket, data) {
-statusMessage(data);
-} // userInfoUpdateFailed
-
-function addUserComplete (socket, data) {
+function addUserComplete (data) {
 statusMessage("New user added.");
 showPage($("#login"));
-$("#login .e-mail").focus();
+focus($("#login .e-mail"));
 } // addUserComplete
-
-function addUserFailed (socket, data) {
-statusMessage(data);
-} // addUserFailed
-
-
-function requestLogin () {
-if ($("#login form").checkValidity()) socket.emit("requestLogin", {eMail: $("#login .e-mail").value, password: $("#login .password").value});
-} // requestLogin
-
-function requestFile () {
-const name = $("#edit-file .file-list").value;
-console.log(`requesting file ${name}`);
-socket.emit("requestFile", {name});
-} // requestFile
-
-function requestFileUpdate (e) {
-const name = $("#edit-file .file-list").value;
-const contents = $("#edit-file .file-contents").value;
-
-socket.emit("requestFileUpdate", {name, contents});
-} // requestFileUpdate
-
-function fileUpdateComplete (socket, data) {
-statusMessage(`${data.name}: update complete.`);
-} // fileUpdateComplete
-
-function requestUserInfo () {
-socket.emit("requestUserInfo");
-} // requestUserInfo
-
-/// socket event handlers
-
-function loginComplete (socket, data) {
-userInfo = data;
-socket.emit("requestFileList");
-console.log("userInfo: ", userInfo);
-} // loginComplete
-
-
-function showLogin () {
-window.removeEventListener("beforeunload", unloadHandler);
-showPage($("#login"));
-$("#login .password").value = "";
-$("#login .e-mail").focus();
-} // showLogin
-
-function logout () {
-window.removeEventListener("beforeunload", unloadHandler);
-window.location = window.location;
-} // logout
 
 function displayUserInfo () {
 //$("#user-info .e-mail").removeAttribute("readonly");
@@ -208,36 +214,10 @@ $("#user-info .first-name").value = data.firstName;
 $("#user-info .last-name").value = data.lastName;
 } // populateUserInfo
 
-function displayFileList (socket, data) {
-console.log("fileList: ", data);
-data.forEach(item => {
-const option = document.createElement("option");
-option.textContent = item;
-$(".file-list").appendChild(option);
-}); // forEach
-
-showPage($("#edit-file"));
-$(".file-list").dispatchEvent(new CustomEvent("change", {bubbles: true}));
-$(".file-list").focus();
-window.addEventListener("beforeunload", unloadHandler);
-} // displayFileList
-
 function unloadHandler (e) {
 (e || window.event).returnValue = "Oh please don't go!";
 return "Oh please don't go!";
 } // unloadHandler
-
-function loginFailed () {
-statusMessage("Invalid credentials; please try again.");
-} // loginFailed
-
-
-
-function displayFileContents (socket, data) {
-console.log("displayFileContents: ", data);
-$(".file-contents").textContent = data.contents;
-} // displayFileContents
-
 
 function handleSocketError (socket, data) {
 statusMessage(`Error: ${data}`);
@@ -251,6 +231,11 @@ $("title").textContent = title;
 $(".page-title", container).tabIndex = -1;
 $(".page-title", container).focus();
 } // showPage
+
+function focus (element, delay = 100) {
+setTimeout(() => element.focus(), delay);
+} // focus
+;
 
 
 </script>

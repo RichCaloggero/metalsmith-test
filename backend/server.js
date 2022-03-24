@@ -34,79 +34,72 @@ console.log(`${socket.id} upgraded transport to ${socket.conn.transport.name}`);
 }); // log connection
 
 activeSockets.set(socket, {}); // maintain state
-requestLogin(socket);
+displayLogin(socket);
+
+socket.on("requestLogin", login);
+socket.on("requestFileList", fileList);
+socket.on("requestFileContents", fileContents);
+socket.on("requestUpdateFile", updateFile);
 
 registerSocketEvents(socket, {
-requestLogin: {handler: login, response: ["loginComplete", "loginFailed"]},
-requestFileList: {handler: fileList, response: "fileList"},
-requestFile: {handler: fileContents, response: "fileContents"},
-requestFileUpdate: {handler: updateFile, response: "fileUpdateComplete"},
 requestUpdateUserInfo: {handler: updateUserInfo, response: ["updateUserInfoComplete", "updateUserInfoFailed"]},
 requestAddUser: {handler: addUser, response: ["addUserComplete", "addUserFailed"]},
 error: handleSocketError,
 disconnect: handleSocketDisconnect
 }); // registerEvents
-}); // socket
-
-server.listen(3000, () => {
-console.log("Listening on port 3000");
-}); // listen
 
 
-
-/// event handlers
-
-function login (socket, data) {
+function login (data, respond)  {
 console.log("login: ", data);
 const userInfo = auth.login(data.eMail, data.password);
-return userInfo? activeSockets.get(socket).userInfo = Object.assign({}, userInfo, {password: ""})
-: null;
+userInfo? respond(activeSockets.get(socket).userInfo = Object.assign({}, userInfo, {password: ""}))
+: socket.emit("error", "Invalid credentials");
 } // login
 
-function requestLogin (socket, data) {
-socket.emit("requestLogin");
-} // forceLogout
-
-function fileList (socket, data) {
+function fileList (data, response) {
 if (validLogin(socket)) {
-console.log("sending fileList");
-return (activeSockets.get(socket).fileList = getFileList(socket));
+console.log("sending file list");
+response(activeSockets.get(socket).fileList = getFileList(socket));
 } // if
 } // fileList
 
-function getFileList () {
-return getAllFiles("source");
-} // getFileList
 
-function fileContents (socket, data) {
+function fileContents (data, response) {
 if (validLogin(socket)) {
 const fileList = activeSockets.get(socket).fileList;
 console.log("sendFile: fileList.length = ", fileList?.length);
 if (fileList.includes(data.name)) {
-return {name: data.name, contents: fs.readFileSync(data.name).toString()};
+response({name: data.name, contents: fs.readFileSync(data.name).toString()});
+} else {
+response(null);
 } // if
 } // if
 } // fileContents
 
-function updateFile (socket, data) {
+function updateFile (data, response) {
 if (validLogin(socket) && data.name) {
 fs.writeFileSync(data.name, data.contents);
 build();
-return {name: data.name};
+response({name: data.name});
+} else {
+response(null);
 } // if
 } // updateFile
 
-function updateUserInfo (socket, data) {
+function updateUserInfo (data, response) {
 if (validLogin(socket)) {
-if (not(auth.getUser(data.eMail).eMail === data.eMail)) return {error: `eMail ${data.eMail} already exists; try another.`};
-return auth.updateUserInfo(data);
+if (not(auth.getUser(data.eMail).eMail === data.eMail)) {
+socket.emit("error", `eMail ${data.eMail} already exists; try another.`);
+return;
+} // if
+response(auth.updateUserInfo(data));
 
 } else {
-return auth.addUser(data);
+response(auth.addUser(data));
 } // if
 } // updateUserInfo
 
-function addUser (socket, data) {
+function addUser (data, response) {
 return auth.addUser(data);
 } // addUser
 
@@ -123,6 +116,27 @@ console.log(`${activeSockets.size} active sockets found.`);
 function validLogin (socket) {
 return activeSockets.get(socket).userInfo;
 } // validLogin
+
+
+}); // socket
+
+server.listen(3000, () => {
+console.log("Listening on port 3000");
+}); // listen
+
+
+
+/// event handlers
+
+
+
+function displayLogin (socket, data) {
+socket.emit("displayLogin");
+} // displayLogin
+
+function getFileList () {
+return getAllFiles("source");
+} // getFileList
 
 
 function sendClient (req, res, next) {
