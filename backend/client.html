@@ -53,7 +53,6 @@
 <script type="module">
 import {createStatusArea, $, $$, not, statusMessage} from "./domUtilities.js";
 import {registerDomEvents} from "./domEvents.js";
-import registerSocketEvents from "./socketEvents.js";
 
 createStatusArea();
 const socket = io({
@@ -62,6 +61,8 @@ rememberUpgrade: true,
 statusMessage("Ready.");
 let userInfo = null;
 
+socket.on("displayLogin", displayLogin)
+.on("error", handleSocketError);
 
 registerDomEvents({
 "nav .user-info": {handler: displayUserInfo},
@@ -70,14 +71,10 @@ registerDomEvents({
 "#edit-file .file-list": {type: "change", handler: requestFileContents},
 "#edit-file .update": {handler: requestFileUpdate},
 "#user-info .submit": {handler: requestUpdateUserInfo},
+"#user-info .delete": {handler: requestDeleteUserInfo},
 });
 
 
-registerSocketEvents(socket, {
-displayLogin: showLogin,
-forceLogout: logout,
-error: handleSocketError
-});
 document.addEventListener("submit", e => e.preventDefault());
 
 /// dom event handlers
@@ -99,8 +96,7 @@ console.log("- got response to requestLogin: ", userInfo);
 socket.emit("requestFileList", null, displayFileList);
 
 } else {
-statusMessage("invalid credentials; try again");
-focus($("#login .eMail"));
+focus($("#login .e-mail"));
 } // if
 } // loginComplete
 
@@ -141,7 +137,7 @@ statusMessage(`${data.name}: update complete.`);
 } // fileUpdateComplete
 
 
-function showLogin () {
+function displayLogin () {
 window.removeEventListener("beforeunload", unloadHandler);
 showPage($("#login"));
 $("#login .password").value = "";
@@ -153,6 +149,16 @@ window.removeEventListener("beforeunload", unloadHandler);
 window.location = window.location;
 } // logout
 
+function requestDeleteUserInfo () {
+socket.emit("requestDeleteUserInfo", userInfo, deleteUserInfoComplete);
+} // requestDeleteUser
+
+function deleteUserInfoComplete (data) {
+if (data) {
+userInfo = null;
+userInfoUpdateComplete(data);
+} // if
+} // deleteUserInfoComplete
 
 function requestUpdateUserInfo () {
 const newInfo = getUserInfo();
@@ -162,15 +168,7 @@ focus($("#user-info .password"));
 return;
 } // if
 
-if (userInfo) {
-console.log("updating logged in user with ", newInfo);
-
-socket.emit("requestUpdateUserInfo", newInfo, updateUserComplete);
-return;
-} // if
-
-console.log("adding new user: ", newInfo, addUserComplete);
-socket.emit("requestAddUser", newInfo);
+socket.emit("requestUpdateUserInfo", newInfo, userInfoUpdateComplete);
 } // updateUserInfo
 
 function getUserInfo () {
@@ -183,30 +181,44 @@ return (password1 === password2)?
 
 function userInfoUpdateComplete (data) {
 if (data) {
-statusMessage("Changes saved.");
 showPage($("#login"));
 focus($("#login .e-mail"));
 } else {
-statusMessage("update failed.");
+focus($("#user-info .first-name"));
 } // if
 } // userInfoUpdateComplete
 
-function addUserComplete (data) {
-statusMessage("New user added.");
-showPage($("#login"));
-focus($("#login .e-mail"));
-} // addUserComplete
-
 function displayUserInfo () {
-//$("#user-info .e-mail").removeAttribute("readonly");
 if (userInfo) {
 // we're logged in, so not allowed to change eMail
 populateUserInfo(userInfo);
-//$("#user-info .e-mail").setAttribute("readonly", "");
+lockEMail();
+showDeleteButton();
+
+} else {
+unlockEMail();
+hideDeleteButton();
 } // if
+
 showPage($("#user-info"));
 $("#user-info .first-name").focus();
 } // displayUserInfo
+
+function lockEMail () {
+$("#user-info .e-mail").setAttribute("readonly", "");
+} // lockEMail
+
+function unlockEMail () {
+$("#user-info .e-mail").removeAttribute("readonly");
+} // unlockEMail
+
+function hideDeleteButton () {
+$("#user-info .delete").hidden = true;
+} // hideDeleteButton
+
+function showDeleteButton () {
+$("#user-info .delete").hidden = false;
+} // showDeleteButton
 
 function populateUserInfo (data) {
 $("#user-info .e-mail").value = data.eMail;
@@ -219,7 +231,7 @@ function unloadHandler (e) {
 return "Oh please don't go!";
 } // unloadHandler
 
-function handleSocketError (socket, data) {
+function handleSocketError (data) {
 statusMessage(`Error: ${data}`);
 } // handleSocketError
 
@@ -232,7 +244,7 @@ $(".page-title", container).tabIndex = -1;
 $(".page-title", container).focus();
 } // showPage
 
-function focus (element, delay = 100) {
+function focus (element, delay = 1500) {
 setTimeout(() => element.focus(), delay);
 } // focus
 ;

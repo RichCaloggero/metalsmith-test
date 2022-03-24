@@ -18,7 +18,6 @@ cors: {origin: "http://localhost:8000"}
 
 import * as auth from "./auth.js";
 import build from "../build.js";
-import registerSocketEvents from "./socketEvents.js";
 
 const activeSockets = new Map();
 
@@ -36,24 +35,26 @@ console.log(`${socket.id} upgraded transport to ${socket.conn.transport.name}`);
 activeSockets.set(socket, {}); // maintain state
 displayLogin(socket);
 
-socket.on("requestLogin", login);
-socket.on("requestFileList", fileList);
-socket.on("requestFileContents", fileContents);
-socket.on("requestUpdateFile", updateFile);
-
-registerSocketEvents(socket, {
-requestUpdateUserInfo: {handler: updateUserInfo, response: ["updateUserInfoComplete", "updateUserInfoFailed"]},
-requestAddUser: {handler: addUser, response: ["addUserComplete", "addUserFailed"]},
-error: handleSocketError,
-disconnect: handleSocketDisconnect
-}); // registerEvents
+socket.on("requestLogin", login)
+.on("requestFileList", fileList)
+.on("requestFileContents", fileContents)
+.on("requestUpdateFile", updateFile)
+.on("requestUpdateUserInfo", updateUserInfo)
+.on("requestDeleteUserInfo", deleteUserInfo)
+.on("error", handleSocketError)
+.on("disconnect", handleDisconnect);
 
 
-function login (data, respond)  {
+
+function login (data, response)  {
 console.log("login: ", data);
 const userInfo = auth.login(data.eMail, data.password);
-userInfo? respond(activeSockets.get(socket).userInfo = Object.assign({}, userInfo, {password: ""}))
-: socket.emit("error", "Invalid credentials");
+if (userInfo) {
+response(activeSockets.get(socket).userInfo = Object.assign({}, userInfo, {password: ""}))
+} else {
+socket.emit("error", "Invalid credentials");
+response(null);
+} // if
 } // login
 
 function fileList (data, response) {
@@ -87,36 +88,44 @@ response(null);
 } // updateFile
 
 function updateUserInfo (data, response) {
-if (validLogin(socket)) {
-if (not(auth.getUser(data.eMail).eMail === data.eMail)) {
-socket.emit("error", `eMail ${data.eMail} already exists; try another.`);
+if (
+(validLogin(socket) && currentUser().eMail === data.eMail)
+|| (not(validLogin(socket)) && not(auth.userExists(data.eMail)))
+) {
+response(auth.updateUserInfo(data));
 return;
 } // if
-response(auth.updateUserInfo(data));
 
-} else {
-response(auth.addUser(data));
-} // if
+socket.emit("error", `User ${data.eMail} already exists; login to update.`);
+response(null);
 } // updateUserInfo
 
-function addUser (data, response) {
-return auth.addUser(data);
-} // addUser
+function deleteUserInfo (data, response) {
+if (validLogin(socket) && currentUser().eMail === data.eMail) {
+response(auth.deleteUserInfo(data.eMail));
+} else {
+socket.emit("error", "Can only delete your own user info; please log in first.");
+response(null);
+} // if
+} // deleteUserInfo
 
-function handleSocketError (socket, data) {
+function handleSocketError (data) {
 console.log("error: ", data);
 } // handleError
 
-function handleSocketDisconnect (socket, data) {
+function handleDisconnect (data) {
 activeSockets.delete(socket);
 console.log(`socket ${socket.id} disconnected;  ${data}`);
 console.log(`${activeSockets.size} active sockets found.`);
 } // handleSocketDisconnect
 
+function currentUser () {
+return activeSockets.get(socket).userInfo;
+} // currentUser
+
 function validLogin (socket) {
 return activeSockets.get(socket).userInfo;
 } // validLogin
-
 
 }); // socket
 
@@ -164,5 +173,6 @@ path.join(dirPath, "/", file));
 
 return list;
 } // getAllFiles
+
 
 function not (x) {return !Boolean(x);}

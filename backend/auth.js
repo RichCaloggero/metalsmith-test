@@ -14,34 +14,23 @@ export function countUsers () {
 return Object.keys(db.users);
 } // countUsers
 
-export function addUser (info) {
-if (validateInfo(info) && not(getUser(info.eMail))) {
-const newInfo = Object.assign({}, info);
-newInfo.password = hash(info.password);
-db.users[info.eMail] = newInfo;
-console.log("added user ", info.eMail, ", ", db.users[info.eMail]);
-writeDatabase(db);
-return true;
-} // if
-
-return {error: `add user: eMail ${info.eMail} already exists.`};
-} // addUser
-
 export function updateUserInfo (info) {
-if (not(validateInfo(info))) return {error: "invalid submission"};
-
 const oldInfo = getUser(info.eMail);
-console.log("updating user ", oldInfo, " with ", info);
-if (not(oldInfo)) delete db.users[info.eMail];
-
-const newInfo = Object.assign({}, oldInfo, info);
+const newInfo = oldInfo?
+Object.assign({}, oldInfo, info)
+: info;
 newInfo.password = hash(info.password);
-console.log("updateUserInfo: ", oldInfo, ", ", newInfo);
-db.users[info.eMail] = newInfo;
+db.users[newInfo.eMail] = newInfo;
 writeDatabase(db);
+console.log("updateUserInfo: ", oldInfo, ", ", newInfo);
 
 return true;
 } // updateUserInfo
+
+export function deleteUserInfo (eMail) {
+return (eMail && userExists(eMail))? delete db.users[eMail]
+: false;
+} // deleteUserInfo
 
 export function validateInfo (info) {
 return Object.keys(template).every(key =>
@@ -89,6 +78,10 @@ if (not(h1) || not(h2) || h1.length !== h2.length) return false;
 
 return h1.every((x, i) => x === h2[i]);
 } // hashMatch 
+
+export function userExists (eMail) {
+return eMail && getUser(eMail);
+} // userExists
 
 function not (x) {return !Boolean(x);}
 
