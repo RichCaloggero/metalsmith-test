@@ -9,6 +9,7 @@
 <a href="/">Home</a>
 <button class="user-info">User info</button>
 <button class="logout">Logout</button>
+<button class="manage-users">Manage users</button>
 </nav>
 <main>
 
@@ -47,6 +48,13 @@
 </form>
 </div><!-- user-info page -->
 
+<div id="user-list" class="page" hidden>
+<h1 class="page-title">Currently defined users</h1>
+<table class="user-list"></table>
+<hr>
+<button class="delete">Delete selected users</button>
+</div>
+
 </main>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -67,6 +75,8 @@ socket.on("displayLogin", displayLogin)
 registerDomEvents({
 "nav .user-info": {handler: displayUserInfo},
 "nav .logout": {handler: logout},
+"nav .manage-users": {handler: requestUserList},
+"#user-list .delete": {handler: requestDeleteSelectedUsers},
 "#login .login": {handler: requestLogin},
 "#edit-file .file-list": {type: "change", handler: requestFileContents},
 "#edit-file .update": {handler: requestFileUpdate},
@@ -199,10 +209,10 @@ showDeleteButton();
 unlockEMail();
 hideDeleteButton();
 } // if
-
 showPage($("#user-info"));
 $("#user-info .first-name").focus();
 } // displayUserInfo
+
 
 function lockEMail () {
 $("#user-info .e-mail").setAttribute("readonly", "");
@@ -225,6 +235,33 @@ $("#user-info .e-mail").value = data.eMail;
 $("#user-info .first-name").value = data.firstName;
 $("#user-info .last-name").value = data.lastName;
 } // populateUserInfo
+
+function requestUserList () {
+socket.emit("requestUserList", null, displayUserList);
+} // requestUserList
+
+function displayUserList (data) {
+$("#user-list table").innerHTML = `
+<tr><th>eMail</th> <th>First name</th> <th>Last name</th></tr>
+${data.map(info => `<tr>
+<td><label>${info.eMail} <input type="checkbox"></label></td>
+<td>${info.firstName}</td>
+<td>${info.lastName}</td>
+</tr>
+`).join("\n")}
+`;
+
+showPage($("#user-list"));
+} // displayUserList
+
+function requestDeleteSelectedUsers () {
+const eMails = $$("#user-list tr :checked").map(input => input.parentElement.textContent.trim());
+socket.emit("requestDeleteUsers", eMails, data => {
+statusMessage(data);
+requestUserList();
+});
+} // deleteSelectedUsers
+
 
 function unloadHandler (e) {
 (e || window.event).returnValue = "Oh please don't go!";

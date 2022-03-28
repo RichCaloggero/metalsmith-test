@@ -2,7 +2,6 @@ import fs from "fs";
 import crypto from "crypto";
 
 const db = readDatabase();
-const template = db.template;
 
 
 export function deleteAllUsers () {
@@ -33,8 +32,8 @@ return (eMail && userExists(eMail))? delete db.users[eMail]
 } // deleteUserInfo
 
 export function validateInfo (info) {
-return Object.keys(template).every(key =>
-info.hasOwnProperty(key) && typeof(info[key]) === typeof(template[key]));
+return Object.keys(db.template).every(key =>
+info.hasOwnProperty(key) && typeof(info[key]) === typeof(db.template[key]));
 } // validateInfo
 
 export function login (eMail, password) {
@@ -66,6 +65,8 @@ function writeDatabase (db) {
 fs.writeFileSync("./backend/users.json", JSON.stringify(db, null, 2));
 } // writeDatabase
 
+export function flushDatabase () {writeDatabase(db);}
+
 
 export function hash (message) {
 const _hash = crypto.createHash("sha256");
@@ -82,6 +83,15 @@ return h1.every((x, i) => x === h2[i]);
 export function userExists (eMail) {
 return eMail && getUser(eMail);
 } // userExists
+
+export function isAdmin (eMail) {
+console.log("isAdmin: ", eMail);
+return db.roles[eMail] === "admin";
+} // isAdmin
+
+export function getUserList () {
+return Object.keys(db.users).map(eMail => Object.assign({}, db.users[eMail], {password: ""}));
+} // getUserList
 
 function not (x) {return !Boolean(x);}
 

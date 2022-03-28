@@ -41,6 +41,8 @@ socket.on("requestLogin", login)
 .on("requestUpdateFile", updateFile)
 .on("requestUpdateUserInfo", updateUserInfo)
 .on("requestDeleteUserInfo", deleteUserInfo)
+.on("requestUserList", userList)
+.on("requestDeleteUsers", deleteUsers)
 .on("error", handleSocketError)
 .on("disconnect", handleDisconnect);
 
@@ -109,6 +111,22 @@ response(null);
 } // if
 } // deleteUserInfo
 
+function userList (data, response) {
+if (isAdmin()) {
+response(auth.getUserList());
+} else {
+socket.emit("error", "You must be admin to use this function.");
+response(null);
+} // if
+} // userList
+
+function deleteUsers (data, response) {
+console.log("deleteUsers: ", data);
+const count = data.map(eMail => auth.deleteUserInfo(eMail)).filter(status => status).length;
+auth.flushDatabase();
+response(`${count} users deleted.`);
+} // deleteUsers
+
 function handleSocketError (data) {
 console.log("error: ", data);
 } // handleError
@@ -124,8 +142,12 @@ return activeSockets.get(socket).userInfo;
 } // currentUser
 
 function validLogin (socket) {
-return activeSockets.get(socket).userInfo;
+return activeSockets.get(socket)?.userInfo;
 } // validLogin
+
+function isAdmin () {
+return auth.isAdmin(validLogin(socket)?.eMail);
+} // isAdmin
 
 }); // socket
 
@@ -173,6 +195,7 @@ path.join(dirPath, "/", file));
 
 return list;
 } // getAllFiles
+
 
 
 function not (x) {return !Boolean(x);}
